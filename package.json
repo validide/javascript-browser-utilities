@@ -1,5 +1,5 @@
 {
-  "name": "javascript-browser-utilities",
+  "name": "@validide/javascript-browser-utilities",
   "version": "0.0.1",
   "description": "JavaScript Browser Utilities",
   "main": "dist/js/index.js",
