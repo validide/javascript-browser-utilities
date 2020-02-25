@@ -7,9 +7,9 @@ const pathsToClean = [
   "./dist"
 ];
 
-for(let i=0; i< pathsToClean.length; i++) {
+for (let i = 0; i < pathsToClean.length; i++) {
   let matches = glob.sync(pathsToClean[i], []);
-  for(let j=0; j < matches.length; j++) {
+  for (let j = 0; j < matches.length; j++) {
     rimraf.sync(matches[j]);
   }
 }
