@@ -1,10 +1,3 @@
-import { sayHello } from '../src/index'
-import { expect } from 'chai'
-import 'mocha'
+import {testFromModule} from './form/index.spec'
 
-describe('First test',
-  () => {
-    it('should return true', () => {
-      expect(sayHello('Johny')).to.equal('Hello Johny!')
-    })
-  })
+testFromModule();
