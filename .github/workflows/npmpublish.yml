@@ -15,31 +15,34 @@ jobs:
       - run: npm ci
       - run: npm test
 
-  publish-npm:
+  publish-pacakges:
     needs: build
     runs-on: ubuntu-latest
     steps:
+
+      # checkout the repo
       - uses: actions/checkout@v2
+
+      # update version
+      - uses: actions/setup-node@v1
+      - run: npm version ${{GITHUB_REF}}
+      - run: npm ci
+
+      # publish to NPMJS
       - uses: actions/setup-node@v1
         with:
           node-version: 12
           registry-url: https://registry.npmjs.org/
-      - run: npm ci
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 
-  publish-gpr:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+      # publish to GitHub Pacakge Registry
       - uses: actions/setup-node@v1
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
           scope: '@validide'
-      - run: npm ci
       - run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
