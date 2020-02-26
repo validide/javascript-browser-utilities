@@ -23,10 +23,16 @@ jobs:
       # checkout the repo
       - uses: actions/checkout@v2
 
+      # extract tag name
+      - id: tag
+        uses: actions/github-script@0.2.0
+        with:
+          script: return context.payload.ref.replace(/\/?refs\/tags\//, '');
+
       # update version
       - uses: actions/setup-node@v1
       - run: npm ci
-      - run: npm version ${{github.ref}}
+      - run: npm version ${{ steps.tag.outputs.result }}
 
       # publish to NPMJS
       - uses: actions/setup-node@v1
