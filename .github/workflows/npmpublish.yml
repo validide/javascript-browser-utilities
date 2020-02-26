@@ -30,7 +30,9 @@ jobs:
       # update version
       - uses: actions/setup-node@v1
       - run: npm ci
-      - run: npm version ${{ steps.tag.outputs.result }}
+      - run: npm version $VERSION
+        env:
+            SOURCE_NAME: ${{ steps.tag.outputs.VERSION }}
 
       # publish to NPMJS
       - uses: actions/setup-node@v1
