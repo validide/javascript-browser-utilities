@@ -64,6 +64,6 @@ jobs:
           scope: '@validide'
       - run: |
           echo @validide:registry=https://npm.pkg.github.com/ >> .npmrc
-          npm publish
+          npm publish --access restricted
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
