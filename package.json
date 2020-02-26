@@ -45,8 +45,5 @@
   "files": [
     "dist",
     "src"
-  ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  }
+  ]
 }

@@ -65,7 +65,7 @@ export function testFromModule() {
           ]
         }, form);
         expect(form.querySelector<HTMLInputElement>('input[name="num"]')?.value).to.eq((1).toString());
-        expect(form.querySelector<HTMLInputElement>('input[name="falseBool"]')?.value).to.eq(''); // (false).toString()
+        expect(form.querySelector<HTMLInputElement>('input[name="falseBool"]')?.value).to.eq((false).toString());
         expect(form.querySelector<HTMLInputElement>('input[name="trueBool"]')?.value).to.eq((true).toString());
         expect(form.querySelector<HTMLInputElement>('input[name="empty"]')?.value).to.eq('');
         expect(form.querySelector<HTMLInputElement>('input[name="und"]')?.value).to.eq('');

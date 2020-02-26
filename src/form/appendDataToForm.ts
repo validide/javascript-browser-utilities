@@ -16,7 +16,7 @@ function appendData(ownerDocument: Document, form: HTMLFormElement, data: any, p
       });
     }
   } else {
-    appendInput(ownerDocument, form, parentProp, !data ? '' : data);
+    appendInput(ownerDocument, form, parentProp, data === null || data === undefined ? '' : data.toString());
   }
 }
 
