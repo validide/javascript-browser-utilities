@@ -26,9 +26,7 @@ jobs:
       # update version
       - uses: actions/setup-node@v1
       - run: npm ci
-      - run: npm version $RELEASE_VERSION
-        env:
-          RELEASE_VERSION: ${{github.ref}}
+      - run: npm version ${{github.ref}}
 
       # publish to NPMJS
       - uses: actions/setup-node@v1
