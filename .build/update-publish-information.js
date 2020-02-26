@@ -1,6 +1,7 @@
 const _fs = require(`fs`);
+const args = process.argv.slice(2);
 
-const packageVersion = process.argv[0].trim();
+const packageVersion = args[0].trim().replace(/^v\./gi, '').replace(/^v/gi, '');
 const packageFileLocation = './package.json';
 const packageFile = _fs.readFileSync(packageFileLocation);
 const package = packageFile
