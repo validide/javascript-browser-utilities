@@ -1,6 +1,6 @@
 {
   "name": "@validide/javascript-browser-utilities",
-  "version": "1.2.3-alpha03",
+  "version": "1.2.3-alpha04",
   "description": "JavaScript Browser Utilities",
   "main": "dist/js/index.js",
   "dependencies": {},
