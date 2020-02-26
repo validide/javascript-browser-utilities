@@ -23,6 +23,9 @@ jobs:
       # checkout the repo
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
+        with:
+          node-version: 12
+          registry-url: https://registry.npmjs.org/
       - run: npm ci
 
       # extract tag name
@@ -49,7 +52,6 @@ jobs:
       # publish to NPMJS
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
           registry-url: https://registry.npmjs.org/
       - run: npm publish
         env:
@@ -58,9 +60,10 @@ jobs:
       # publish to GitHub Pacakge Registry
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
           registry-url: https://npm.pkg.github.com/
           scope: '@validide'
-      - run: npm publish
+      - run: |
+          echo @validide:registry=https://npm.pkg.github.com/ >> .npmrc
+          npm publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
