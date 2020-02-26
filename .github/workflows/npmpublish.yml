@@ -25,9 +25,7 @@ jobs:
 
       # extract tag name
       - id: tag
-        uses: actions/github-script@0.2.0
-        with:
-          script: return context.payload.ref.replace(/\/?refs\/tags\//, '');
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
 
       # update version
       - uses: actions/setup-node@v1
