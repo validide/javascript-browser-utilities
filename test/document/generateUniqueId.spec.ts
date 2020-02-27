@@ -1,9 +1,10 @@
+import 'mocha';
 import { generateUniqueId } from '../../src/index';
 import { expect } from 'chai';
-import 'mocha';
 import { JSDOM } from 'jsdom';
+import { falsies } from '../utils';
 
-function getNewDocument(): Document {return new JSDOM(`<!DOCTYPE html>`).window.document};
+function getNewDocument(): Document { return new JSDOM(`<!DOCTYPE html>`).window.document };
 
 export function test_generateUniqueId() {
   describe('generateUniqueId', () => {
@@ -24,16 +25,10 @@ export function test_generateUniqueId() {
       expect(doc.getElementById(id)).to.be.null;
     })
 
-    it('should not fail for unreasonable values', () => {
-      const ids = [
-        generateUniqueId(doc, <string>(<unknown>undefined)),
-        generateUniqueId(doc, <string>(<unknown>null)),
-        generateUniqueId(doc, <string>(<unknown>false)),
-        generateUniqueId(doc, <string>(<unknown>'')),
-        generateUniqueId(doc, <string>(<unknown>[]))
-      ];
+    it('should not fail for falsies', () => {
+      const ids: Array<string> = falsies.map((f) => generateUniqueId(doc, <string>(<unknown>f)));
 
-      ids.forEach((id, idx) => {
+      ids.forEach((id: string, idx: number) => {
         expect(id.length).to.be.greaterThan(0);
         expect(ids.indexOf(id)).to.eq(idx);
         expect(ids.lastIndexOf(id)).to.eq(idx);
@@ -42,14 +37,13 @@ export function test_generateUniqueId() {
 
     it('should return an id that is unique', () => {
       let called = 0;
-      const unreasonable = [undefined, null, false, '', []];
       const fake = {
-        getElementById: function(elementId: string): HTMLElement | null {
-          if (called >= unreasonable.length ) {
+        getElementById: function (elementId: string): HTMLElement | null {
+          if (called >= falsies.length) {
             return doc.createElement('div');
           }
           called++;
-          return <HTMLElement>(<unknown>unreasonable[called-1]);
+          return <HTMLElement>(<unknown>falsies[called - 1]);
         }
       };
       const id = generateUniqueId(<Document>(<unknown>fake), '');

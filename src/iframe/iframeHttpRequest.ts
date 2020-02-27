@@ -1,5 +1,6 @@
 import { generateUniqueId } from '../document/generateIds';
 import { appendDataToForm } from '../form/appendDataToForm';
+import { getUrlFullPath } from '../document/getUrlFullPath';
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;
@@ -27,10 +28,12 @@ export class IframeHttpRequest {
   private loadHandlerRef: LoadHandlerFunctionType | null;
   private wrapperId: string;
   private timeoutRef: number;
+  private redirectTimeoutRef: number;
+  private lastResult: IframeHttpResponse | null;
 
   private static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
-    redirectTimeout: -1
+    redirectTimeout: 3 * 1000
   }
 
   constructor(
@@ -40,7 +43,7 @@ export class IframeHttpRequest {
     method: string = 'GET',
     options: IframeHttpRequestOptions | null = null
   ) {
-    // TODO: validate input
+    this.validateInput(window, url, method);
     this.window = window;
     this.url = url || 'about:blank'; // empty url is not allowed for src on iFrames and this is where this will endup
     this.data = data;
@@ -51,6 +54,8 @@ export class IframeHttpRequest {
     this.loadHandlerRef = (e: Event) => this.loadHandler(e);
     this.wrapperId = generateUniqueId(this.getDocument(), 'IframeHttpRequest_wrapper_');
     this.timeoutRef = 0;
+    this.redirectTimeoutRef = 0;
+    this.lastResult = null;
 
     this.init();
   }
@@ -63,8 +68,21 @@ export class IframeHttpRequest {
       const wrapper = <HTMLDivElement>this.getDocument().getElementById(this.wrapperId);
       (<HTMLFormElement>wrapper.querySelector('form')).submit();
 
-      this.timeoutRef = this.getWindow().setTimeout(() => { this.timeouRequest(); }, this.options.timeout);
+      this.timeoutRef = this.getWindow().setTimeout(() => { this.reject(new Error('TIMEOUT')); }, this.options.timeout);
     });
+  }
+
+  private validateInput(window: Window, url: string, method: string): void {
+    switch (method?.toUpperCase()) {
+      case 'GET':
+      case 'POST':
+        break;
+
+      default:
+        throw new Error(`Method not supported '${method}'`);
+    }
+
+    throw new Error(`Not implemented!!!`);
   }
 
   private init(): void {
@@ -92,44 +110,59 @@ export class IframeHttpRequest {
     iframe.addEventListener('load', <LoadHandlerFunctionType>this.loadHandlerRef, false)
   }
 
-  private loadHandler(e: Event): void {
-    /*
+  private loadHandler(event: Event): void {
+    this.getWindow().clearTimeout(this.redirectTimeoutRef);
+    const allowRedirects = this.options.redirectTimeout < 0;
+
     try {
+      const contentWindow = <Window>(<HTMLIFrameElement>event.target).contentWindow;
+      // this should throw if iframe is not accessible due to 'X-Frame-Options'
+      const targetPath = getUrlFullPath(contentWindow.document, contentWindow.location.href).toLowerCase();
+      const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase()
+      this.lastResult = {
+        data: (<HTMLElement>contentWindow.document.querySelector('body')).innerText,
+        error: null
+      };
 
-      if (this.checkForRedirect) {
-        var currentUrl = evt.target.contentWindow.location.href;
-        if (getUrlFullPath(currentUrl).toLowerCase() !== getUrlFullPath(this.url).toLowerCase()) {
-          //console.log('Ignoring response since it\'s not the expected URL:\n\t- actual: ' + currentUrl + '\n\t- expected: ' + this.url);
-          return;
-        }
-      }
-
-      var data = evt.target.contentWindow.document.querySelector('body').innerText;
-      this.resolvePromise({
-        status: 'OK',
-        data: data,
-        ex: null
-      });
-      this.cleanup();
-    } catch (e) {
-      if (this.attemptCrossOrigin) {
-        //this might be cross domain but we do not know
-        console.log('Failed to read iframe content. Expected URL: ' + this.url);
-        console.log(e);
+      if ((targetPath != desiredPath) && allowRedirects) {
+        this.schedulePromieResolve();
       } else {
-        this.rejectPromise({
-          status: 'EXCEPTION',
-          data: null,
-          ex: e
-        });
-        this.cleanup();
+        this.resolve(this.lastResult);
+      }
+    } catch (error) {
+      if (allowRedirects) {
+        this.reject(error)
+      } else {
+        this.lastResult = {
+          data: '',
+          error: error
+        };
+        this.schedulePromieResolve();
       }
     }
-     */
   }
 
-  private timeouRequest(): void {
-    (<RejectPromiseFunctionType>this.rejectPromise)({ data: '', error: new Error('TIMEOUT') });
+  private schedulePromieResolve(): void {
+    const win = this.getWindow();
+    win.clearTimeout(this.redirectTimeoutRef);
+    this.redirectTimeoutRef = win.setTimeout(() => this.resolveLastRedirectResponse(), this.options.redirectTimeout);
+  }
+
+  private resolveLastRedirectResponse(): void {
+    if (this.lastResult) {
+      this.resolve(this.lastResult);
+    } else {
+      this.reject(new Error('NO_REDIRECT_RESULT'));
+    }
+  }
+
+  private resolve(value: IframeHttpResponse): void {
+    (<ResolvePromiseFunctionType<IframeHttpResponse>>this.resolvePromise)(value);
+    this.cleanup();
+  }
+
+  private reject(error: Error): void {
+    (<RejectPromiseFunctionType>this.rejectPromise)({ data: '', error: error });
     this.cleanup();
   }
 
@@ -138,8 +171,12 @@ export class IframeHttpRequest {
   private getDocument(): Document { return this.getWindow().document; }
 
   private cleanup(): void {
-    this.getWindow().clearTimeout(this.timeoutRef);
+    const win = this.getWindow();
+    win.clearTimeout(this.timeoutRef);
     this.timeoutRef = 0;
+    win.clearTimeout(this.redirectTimeoutRef);
+    this.redirectTimeoutRef = 0;
+    this.lastResult = null;
     const wrapper = <HTMLDivElement>this.getDocument().getElementById(this.wrapperId);
 
     (<HTMLIFrameElement>wrapper.querySelector('iframe')).removeEventListener('load', <LoadHandlerFunctionType>this.loadHandlerRef, false);

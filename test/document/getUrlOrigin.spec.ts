@@ -1,6 +1,6 @@
+import 'mocha';
 import { getUrlOrigin } from '../../src/index';
 import { expect } from 'chai';
-import 'mocha';
 import { JSDOM } from 'jsdom';
 
 export function test_getUrlOrigin() {

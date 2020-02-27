@@ -1,6 +1,6 @@
+import 'mocha';
 import { getUrlFullPath } from '../../src/index';
 import { expect } from 'chai';
-import 'mocha';
 import { JSDOM } from 'jsdom';
 
 function getNewDocument(): Document {return new JSDOM(`<!DOCTYPE html>`).window.document};
