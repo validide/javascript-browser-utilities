@@ -9,7 +9,7 @@ function getRanomId(): string { return Math.random().toString(36).substr(2); }
  * @param document The reference to the document object
  * @returns A random generated string
  */
-function generateUniqueId(document: Document, prefix: string): string {
+function generateUniqueId(document: Document, prefix: string = ''): string {
   while(true) {
     const id = (prefix ?? '') + getRanomId();
     if (document.getElementById(id) === null) {
