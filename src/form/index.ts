@@ -1,1 +1,1 @@
-export { appendDataToForm } from './appendDataToForm';
+export * from './appendDataToForm';

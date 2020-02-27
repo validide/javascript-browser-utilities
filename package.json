@@ -23,9 +23,8 @@
   "scripts": {
     "clean": "node ./.build/clean.js",
     "prebuild": "npm run clean",
-    "build": "tsc && node ./.build/minify.js",
-    "test": "nyc mocha",
-    "dev": "tsc -w"
+    "build": "tsc --module es2015 && node ./.build/minify.js",
+    "test": "nyc mocha"
   },
   "repository": {
     "type": "git",

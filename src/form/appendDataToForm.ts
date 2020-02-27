@@ -21,7 +21,7 @@ function appendData(ownerDocument: Document, form: HTMLFormElement, data: any, p
 }
 
 /**
- * Append an object to a form as `input`([[HTMLInputElement]]) elements
+ * Append an object to a form as 'input'([[HTMLInputElement]]) elements
  * @param data The information to append to the the ´form´
  * @param form The form ([[HTMLFormElement]]) element to elements to
  * @throws {Error} if the ´form´ does not have an 'ownerDocument'
