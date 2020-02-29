@@ -50,7 +50,7 @@ export class IframeHttpRequest {
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
     this.data = data;
     this.method = method;
-    this.options = <IframeHttpRequestOptions>Object.assign({}, options, IframeHttpRequest.DEFAULT_OPTIONS);
+    this.options = <IframeHttpRequestOptions>Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options);
     this.resolvePromise = null;
     this.rejectPromise = null;
     this.loadHandlerRef = (e: Event) => this.loadHandler(e);
@@ -149,7 +149,11 @@ export class IframeHttpRequest {
       const wrapper = <HTMLDivElement>this.getDocument().getElementById(this.wrapperId);
       try {
         (<HTMLFormElement>wrapper.querySelector('form')).submit();
-        this.timeoutRef = this.getWindow().setTimeout(() => { this.reject(new Error('TIMEOUT')); }, this.options.timeout);
+        this.timeoutRef = this.getWindow().setTimeout(() => {
+            this.reject(new Error('TIMEOUT'));
+          },
+          2
+        );
       } catch (error) {
         this.reject(error);
       }

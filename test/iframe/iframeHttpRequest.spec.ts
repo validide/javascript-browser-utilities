@@ -4,6 +4,15 @@ import { JSDOM } from 'jsdom';
 import { IframeHttpRequest, IframeHttpRequestOptions, IframeHttpResponse } from '../../src/iframe/iframeHttpRequest';
 import { falsies } from '../utils';
 
+function overrideFormSubmit(win: Window, req: IframeHttpRequest, overrideFunc: () => void) {
+  //JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit
+  const sendAsyncCoreOriginal: Function = (<any>req).sendAsyncCore;
+  (<any>req).sendAsyncCore = function () {
+    (<HTMLFormElement>win.document.querySelector('form')).submit = overrideFunc;
+    return sendAsyncCoreOriginal.call(this);
+  };
+}
+
 export function test_iframeHttpRequest() {
   describe('IframeHttpRequestOptions', () => {
     it('should have public getters and setters', () => {
@@ -72,13 +81,24 @@ export function test_iframeHttpRequest() {
         () => {
 
           const req = new IframeHttpRequest(_win, 'http://www.google.com/', null);
-          (<any>req).sendAsyncCore = function(){ return Promise.resolve(''); }; //JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit
-
+          overrideFormSubmit(_win, req, () => { });
 
           req.sendAsync().catch(e => { /* ignore error for this case */ });
           req.sendAsync().catch(e => { /* ignore error for this case */ });
         }
       ).throws(Error, 'The "send" method was already called!')
+    })
+
+    it('override default options', () => {
+      const req = new IframeHttpRequest(_win, 'http://www.google.com/', null, 'GET', {
+        redirectTimeout: 12,
+        timeout: 23
+      });
+
+      const opts: IframeHttpRequestOptions = (<any>req).options;
+      expect(opts.redirectTimeout).to.eq(12);
+      expect(opts.timeout).to.eq(23);
+      req.dispose();
     })
 
     it('calling dispose multiple times does not throw an error', () => {
@@ -97,10 +117,10 @@ export function test_iframeHttpRequest() {
           () => {
 
             const req = new IframeHttpRequest(_win, 'http://www.google.com/', <object>(<unknown>falsie));
-            (<any>req).sendAsyncCore = function(){ return Promise.resolve(''); }; //JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit
-
+            overrideFormSubmit(_win, req, () => { });
 
             req.sendAsync().catch(e => { /* ignore error for this case */ });
+            req.dispose();
           }
         ).not.throws()
       });
@@ -110,13 +130,46 @@ export function test_iframeHttpRequest() {
       expect(
         () => {
           const req = new IframeHttpRequest(_win, 'http://www.google.com/');
-          (<any>req).sendAsyncCore = function(){ return Promise.resolve(''); }; //JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit
+          overrideFormSubmit(_win, req, () => { });
 
-
-            req.sendAsync().catch(e => { /* ignore error for this case */ });
-            req.dispose();
+          req.sendAsync().catch(e => { /* ignore error for this case */ });
+          req.dispose();
         }
       ).not.throws();
     })
+
+    it('rejects with error in case of submit error', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://www.google.com/');
+      overrideFormSubmit(_win, req, () => { throw new Error('submit error') });
+      req.sendAsync()
+        .catch((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('');
+          expect(response.error).to.not.be.null;
+          expect((<Error>response.error).message).to.eq('submit error');
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send rejects with timeout', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://www.google.com/', null, 'GET', {
+        redirectTimeout: -1,
+        timeout: 5
+      });
+      overrideFormSubmit(_win, req, () => { });
+      req.sendAsync()
+        .catch((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('');
+          expect(response.error).to.not.be.null;
+          expect((<Error>response.error).message).to.eq('TIMEOUT');
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
   })
 }
