@@ -6,16 +6,29 @@ type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;
 type RejectPromiseFunctionType = (reason: IframeHttpResponse) => void;
 
+/**
+ * Configure the request options
+ * @property timeout The maximum request timeout (in milliseconds). The request will be reject as TIMEOUT error if nothing happens in this interval.
+ * @property redirectTimeout The maximum delay (in milliseconds) between consecutive redirect. If set to zero or less the first response is returned.
+ */
 export interface IframeHttpRequestOptions {
   timeout: number;
   redirectTimeout: number;
 }
 
+/**
+ * The response
+ * @property data The body innerHTML in case of success or an empty string in case of error.
+ * @property error The error in case of the promise beeing rejected or the null in case of success.
+ */
 export interface IframeHttpResponse {
   data: string,
   error: Error | null
 }
 
+/**
+ * Make a HTTP request using an iframe
+ */
 export class IframeHttpRequest {
   private window: Window | null;
   private url: string;
@@ -32,11 +45,22 @@ export class IframeHttpRequest {
   private called: boolean;
   private disposed: boolean;
 
+  /**
+   * Default options [[IframeHttpRequestOptions]]
+   */
   public static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
     redirectTimeout: 3 * 1000
   }
 
+  /**
+   * Object constructor
+   * @param window A reference to the window object
+   * @param url The url to make the request to
+   * @param data The data to send. Default NULL
+   * @param method The HTTP method. GET(default) or POST
+   * @param options The request options [[IframeHttpRequestOptions]]. Default null and will use the [[IframeHttpRequest.DEFAULT_OPTIONS]]
+   */
   constructor(
     window: Window,
     url: string,

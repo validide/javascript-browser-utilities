@@ -96,13 +96,13 @@ export function test_iframeHttpRequest() {
 
     it('override default options', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
-        redirectTimeout: 12,
-        timeout: 23
+        redirectTimeout: 2,
+        timeout: 3
       });
 
       const opts: IframeHttpRequestOptions = (<any>req).options;
-      expect(opts.redirectTimeout).to.eq(12);
-      expect(opts.timeout).to.eq(23);
+      expect(opts.redirectTimeout).to.eq(2);
+      expect(opts.timeout).to.eq(3);
       req.dispose();
     })
 
@@ -143,10 +143,10 @@ export function test_iframeHttpRequest() {
       ).not.throws();
     })
 
-    it('rejects with error in case of submit error', (done) => {
+    it('rejects with error in case of submit error', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/');
       overrideFormSubmit(_win, req, () => { throw new Error('submit error') });
-      req.sendAsync()
+      return req.sendAsync()
         .catch((response: IframeHttpResponse) => {
           expect(response.data).to.eq('');
           expect(response.error).to.not.be.null;
@@ -154,17 +154,16 @@ export function test_iframeHttpRequest() {
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send rejects with timeout', (done) => {
+    it('calling send rejects with timeout', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
         redirectTimeout: 0,
-        timeout: 5
+        timeout: 3
       });
       overrideFormSubmit(_win, req, () => { });
-      req.sendAsync()
+      return req.sendAsync()
         .catch((response: IframeHttpResponse) => {
           expect(response.data).to.eq('');
           expect(response.error).to.not.be.null;
@@ -172,14 +171,13 @@ export function test_iframeHttpRequest() {
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send rejects on CORS error - no redirect', (done) => {
+    it('calling send rejects on CORS error - no redirect', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
         redirectTimeout: 0,
-        timeout: 10
+        timeout: 3
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -189,7 +187,7 @@ export function test_iframeHttpRequest() {
           },
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .catch((response: IframeHttpResponse) => {
           expect(response.data).to.eq('');
           expect(response.error).to.not.be.null;
@@ -197,14 +195,13 @@ export function test_iframeHttpRequest() {
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send rejects on CORS error - with redirect', (done) => {
+    it('calling send rejects on CORS error - with redirect', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
-        redirectTimeout: 5,
-        timeout: 15
+        redirectTimeout: 3,
+        timeout: 8
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -221,7 +218,7 @@ export function test_iframeHttpRequest() {
           },
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .catch((response: IframeHttpResponse) => {
           expect(response.data).to.eq('');
           expect(response.error).to.not.be.null;
@@ -229,14 +226,13 @@ export function test_iframeHttpRequest() {
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send resolves with result - no redirect', (done) => {
+    it('calling send resolves with result - no redirect', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
         redirectTimeout: 0,
-        timeout: 10
+        timeout: 3
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -252,21 +248,20 @@ export function test_iframeHttpRequest() {
           target: iframe,
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .then((response: IframeHttpResponse) => {
           expect(response.data).to.eq('TEST_RESULT');
           expect(response.error).to.be.null;
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send resolves with result - with redirect', (done) => {
+    it('calling send resolves with result - with redirect', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
         redirectTimeout: 3,
-        timeout: 10
+        timeout: 8
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -287,22 +282,20 @@ export function test_iframeHttpRequest() {
           target: iframe,
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .then((response: IframeHttpResponse) => {
           expect(response.data).to.eq('TEST_RESULT_2');
           expect(response.error).to.be.null;
         })
-        .catch(console.log)
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send resolves with result - no redirect & different path', (done) => {
+    it('calling send resolves with result - no redirect & different path', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
         redirectTimeout: 0,
-        timeout: 10
+        timeout: 3
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -318,21 +311,20 @@ export function test_iframeHttpRequest() {
           target: iframe,
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .then((response: IframeHttpResponse) => {
           expect(response.data).to.eq('TEST_RESULT');
           expect(response.error).to.be.null;
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
-    it('calling send resolves with result - no redirect & different path & loadHandlerRef', (done) => {
+    it('calling send resolves with result - no redirect & different path & loadHandlerRef', () => {
       const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
         redirectTimeout: 0,
-        timeout: 10
+        timeout: 3
       });
       overrideFormSubmit(_win, req, function() {
         const ifrmaeRequest: any = <any>req;
@@ -348,14 +340,13 @@ export function test_iframeHttpRequest() {
           target: iframe,
         });
       });
-      req.sendAsync()
+      return req.sendAsync()
         .then((response: IframeHttpResponse) => {
           expect(response.data).to.eq('TEST_RESULT');
           expect(response.error).to.be.null;
         })
         .finally(() => {
           req.dispose();
-          done();
         })
     })
 
