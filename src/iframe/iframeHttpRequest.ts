@@ -29,7 +29,6 @@ export class IframeHttpRequest {
   private wrapperId: string;
   private timeoutRef: number;
   private redirectTimeoutRef: number;
-  private lastResult: IframeHttpResponse | null;
   private called: boolean;
   private disposed: boolean;
 
@@ -57,7 +56,6 @@ export class IframeHttpRequest {
     this.wrapperId = generateUniqueId(this.getDocument(), 'IframeHttpRequest_wrapper_');
     this.timeoutRef = 0;
     this.redirectTimeoutRef = 0;
-    this.lastResult = null;
     this.called = false;
     this.disposed = false;
   }
@@ -82,7 +80,6 @@ export class IframeHttpRequest {
     this.timeoutRef = 0;
     win.clearTimeout(this.redirectTimeoutRef);
     this.redirectTimeoutRef = 0;
-    this.lastResult = null;
     const wrapper = this.getDocument().getElementById(this.wrapperId);
 
     if (wrapper) {
@@ -152,7 +149,7 @@ export class IframeHttpRequest {
         this.timeoutRef = this.getWindow().setTimeout(() => {
             this.reject(new Error('TIMEOUT'));
           },
-          2
+          this.options.timeout
         );
       } catch (error) {
         this.reject(error);
@@ -162,48 +159,43 @@ export class IframeHttpRequest {
 
   private loadHandler(event: Event): void {
     this.getWindow().clearTimeout(this.redirectTimeoutRef);
-    const allowRedirects = this.options.redirectTimeout < 0;
+    const allowRedirects = this.options.redirectTimeout > 0;
 
     try {
       const contentWindow = <Window>(<HTMLIFrameElement>event.target).contentWindow;
       // this should throw if iframe is not accessible due to 'X-Frame-Options'
       const targetPath = getUrlFullPath(contentWindow.document, contentWindow.location.href).toLowerCase();
       const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase()
-      this.lastResult = {
-        data: (<HTMLElement>contentWindow.document.querySelector('body')).innerText,
+      const result:IframeHttpResponse = {
+        data: contentWindow.document.body.innerHTML,
         error: null
       };
 
-      if ((targetPath != desiredPath) && allowRedirects) {
-        this.schedulePromieResolve();
+      if ((targetPath === desiredPath)) {
+        this.resolve(result);
       } else {
-        this.resolve(this.lastResult);
+        if (allowRedirects) {
+          this.schedulePromieResolve(result);
+        } else {
+          this.resolve(result);
+        }
       }
     } catch (error) {
       if (allowRedirects) {
-        this.reject(error)
-      } else {
-        this.lastResult = {
+        this.schedulePromieResolve({
           data: '',
           error: error
-        };
-        this.schedulePromieResolve();
+        });
+      } else {
+        this.reject(error);
       }
     }
   }
 
-  private schedulePromieResolve(): void {
+  private schedulePromieResolve(result:IframeHttpResponse): void {
     const win = this.getWindow();
     win.clearTimeout(this.redirectTimeoutRef);
-    this.redirectTimeoutRef = win.setTimeout(() => this.resolveLastRedirectResponse(), this.options.redirectTimeout);
-  }
-
-  private resolveLastRedirectResponse(): void {
-    if (this.lastResult) {
-      this.resolve(this.lastResult);
-    } else {
-      this.reject(new Error('NO_REDIRECT_RESULT'));
-    }
+    this.redirectTimeoutRef = win.setTimeout(() => { this.resolve(result); }, this.options.redirectTimeout);
   }
 
   private resolve(value: IframeHttpResponse): void {

@@ -72,25 +72,30 @@ export function test_iframeHttpRequest() {
 
     it('should have a valid url reference', () => {
       expect(
-        () => new IframeHttpRequest(_win, 'http://www.google.com/', null, '')
+        () => new IframeHttpRequest(_win, 'http://localhost/', null, '')
       ).throws(Error, 'Method not supported ""');
+    })
+
+    it('should have a the load hander configured', () => {
+      const req = <any>(new IframeHttpRequest(_win, 'http://localhost/segment-1'));
+      expect(req.loadHandlerRef).to.not.be.null;
     })
 
     it('calling send multiple times does throw an error', () => {
       expect(
         () => {
 
-          const req = new IframeHttpRequest(_win, 'http://www.google.com/', null);
+          const req = new IframeHttpRequest(_win, 'http://localhost/', null);
           overrideFormSubmit(_win, req, () => { });
 
-          req.sendAsync().catch(e => { /* ignore error for this case */ });
-          req.sendAsync().catch(e => { /* ignore error for this case */ });
+          req.sendAsync().catch(() => { /* ignore error for this case */ });
+          req.sendAsync().catch(() => { /* ignore error for this case */ });
         }
       ).throws(Error, 'The "send" method was already called!')
     })
 
     it('override default options', () => {
-      const req = new IframeHttpRequest(_win, 'http://www.google.com/', null, 'GET', {
+      const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
         redirectTimeout: 12,
         timeout: 23
       });
@@ -104,7 +109,7 @@ export function test_iframeHttpRequest() {
     it('calling dispose multiple times does not throw an error', () => {
       expect(
         () => {
-          const req = new IframeHttpRequest(_win, 'http://www.google.com/');
+          const req = new IframeHttpRequest(_win, 'http://localhost/');
           req.dispose();
           req.dispose();
         }
@@ -116,10 +121,10 @@ export function test_iframeHttpRequest() {
         expect(
           () => {
 
-            const req = new IframeHttpRequest(_win, 'http://www.google.com/', <object>(<unknown>falsie));
+            const req = new IframeHttpRequest(_win, 'http://localhost/', <object>(<unknown>falsie));
             overrideFormSubmit(_win, req, () => { });
 
-            req.sendAsync().catch(e => { /* ignore error for this case */ });
+            req.sendAsync().catch(() => { /* ignore error for this case */ });
             req.dispose();
           }
         ).not.throws()
@@ -129,7 +134,7 @@ export function test_iframeHttpRequest() {
     it('calling dispose after calling send works', () => {
       expect(
         () => {
-          const req = new IframeHttpRequest(_win, 'http://www.google.com/');
+          const req = new IframeHttpRequest(_win, 'http://localhost/');
           overrideFormSubmit(_win, req, () => { });
 
           req.sendAsync().catch(e => { /* ignore error for this case */ });
@@ -139,7 +144,7 @@ export function test_iframeHttpRequest() {
     })
 
     it('rejects with error in case of submit error', (done) => {
-      const req = new IframeHttpRequest(_win, 'http://www.google.com/');
+      const req = new IframeHttpRequest(_win, 'http://localhost/');
       overrideFormSubmit(_win, req, () => { throw new Error('submit error') });
       req.sendAsync()
         .catch((response: IframeHttpResponse) => {
@@ -154,8 +159,8 @@ export function test_iframeHttpRequest() {
     })
 
     it('calling send rejects with timeout', (done) => {
-      const req = new IframeHttpRequest(_win, 'http://www.google.com/', null, 'GET', {
-        redirectTimeout: -1,
+      const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
+        redirectTimeout: 0,
         timeout: 5
       });
       overrideFormSubmit(_win, req, () => { });
@@ -164,6 +169,189 @@ export function test_iframeHttpRequest() {
           expect(response.data).to.eq('');
           expect(response.error).to.not.be.null;
           expect((<Error>response.error).message).to.eq('TIMEOUT');
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send rejects on CORS error - no redirect', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
+        redirectTimeout: 0,
+        timeout: 10
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+        ifrmaeRequest.loadHandler(<any>{
+          target: {
+            get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error') }
+          },
+        });
+      });
+      req.sendAsync()
+        .catch((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('');
+          expect(response.error).to.not.be.null;
+          expect((<Error>response.error).message).to.eq('SIMULATED X-Frame-Options Error');
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send rejects on CORS error - with redirect', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/', null, 'GET', {
+        redirectTimeout: 5,
+        timeout: 15
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+
+        ifrmaeRequest.loadHandler(<any>{
+          target: {
+            get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (1)') }
+          },
+        });
+
+        ifrmaeRequest.loadHandler(<any>{
+          target: {
+            get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (2)') }
+          },
+        });
+      });
+      req.sendAsync()
+        .catch((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('');
+          expect(response.error).to.not.be.null;
+          expect((<Error>response.error).message).to.eq('SIMULATED X-Frame-Options Error (2)');
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send resolves with result - no redirect', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
+        redirectTimeout: 0,
+        timeout: 10
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+        const iframe = <HTMLIFrameElement>ifrmaeRequest.getDocument().querySelector('iframe');
+        iframe.src = 'http://localhost/segment-1';
+
+        const cWin = <Window>iframe.contentWindow;
+
+        cWin.document.write('TEST_RESULT');
+
+
+        ifrmaeRequest.loadHandler(<any>{
+          target: iframe,
+        });
+      });
+      req.sendAsync()
+        .then((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('TEST_RESULT');
+          expect(response.error).to.be.null;
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send resolves with result - with redirect', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
+        redirectTimeout: 3,
+        timeout: 10
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+        const iframe = <HTMLIFrameElement>ifrmaeRequest.getDocument().querySelector('iframe');
+        let cWin:Window;
+
+        iframe.src = 'http://localhost/segment-2';
+        cWin = <Window>iframe.contentWindow;
+        cWin.document.write('TEST_RESULT_1');
+        ifrmaeRequest.loadHandler(<any>{
+          target: iframe,
+        });
+
+        iframe.src = 'http://localhost/segment-1';
+        cWin = <Window>iframe.contentWindow;
+        cWin.document.write('TEST_RESULT_2');
+        ifrmaeRequest.loadHandler(<any>{
+          target: iframe,
+        });
+      });
+      req.sendAsync()
+        .then((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('TEST_RESULT_2');
+          expect(response.error).to.be.null;
+        })
+        .catch(console.log)
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send resolves with result - no redirect & different path', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
+        redirectTimeout: 0,
+        timeout: 10
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+        const iframe = <HTMLIFrameElement>ifrmaeRequest.getDocument().querySelector('iframe');
+        iframe.src = 'http://localhost/segment-2';
+
+        const cWin = <Window>iframe.contentWindow;
+
+        cWin.document.write('TEST_RESULT');
+
+
+        ifrmaeRequest.loadHandler(<any>{
+          target: iframe,
+        });
+      });
+      req.sendAsync()
+        .then((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('TEST_RESULT');
+          expect(response.error).to.be.null;
+        })
+        .finally(() => {
+          req.dispose();
+          done();
+        })
+    })
+
+    it('calling send resolves with result - no redirect & different path & loadHandlerRef', (done) => {
+      const req = new IframeHttpRequest(_win, 'http://localhost/segment-1', null, 'GET', {
+        redirectTimeout: 0,
+        timeout: 10
+      });
+      overrideFormSubmit(_win, req, function() {
+        const ifrmaeRequest: any = <any>req;
+        const iframe = <HTMLIFrameElement>ifrmaeRequest.getDocument().querySelector('iframe');
+        iframe.src = 'http://localhost/segment-2';
+
+        const cWin = <Window>iframe.contentWindow;
+
+        cWin.document.write('TEST_RESULT');
+
+
+        ifrmaeRequest.loadHandlerRef(<any>{
+          target: iframe,
+        });
+      });
+      req.sendAsync()
+        .then((response: IframeHttpResponse) => {
+          expect(response.data).to.eq('TEST_RESULT');
+          expect(response.error).to.be.null;
         })
         .finally(() => {
           req.dispose();
