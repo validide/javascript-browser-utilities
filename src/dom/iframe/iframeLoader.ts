@@ -1,5 +1,6 @@
 import { BaseComponent } from "../../contracts";
 import { generateUniqueId, getUrlOrigin } from "../document";
+import { getHashCode } from "../../infrastructure";
 
 interface IframeMessage {
   id: string;
@@ -12,8 +13,6 @@ type MessageEventHandlerFunctionType = (e: MessageEvent) => void;
 export enum EventType {
   BeforeCreate = 'beforeCreate',
   Created = 'created',
-  BeforeMount = 'beforeMount',
-  Mounted = 'mounted',
   BeforeUpdate = 'beforeUpdate',
   Updated = 'updated',
   BeforeDestroy = 'beforeDestroy',
@@ -30,8 +29,6 @@ export type EventHandlerFunctionType = (e: IframeLoaderEvent) => void;
 export interface IframeLoaderEvents {
   [EventType.BeforeCreate]?: EventHandlerFunctionType;
   [EventType.Created]?: EventHandlerFunctionType;
-  [EventType.BeforeMount]?: EventHandlerFunctionType;
-  [EventType.Mounted]?: EventHandlerFunctionType;
   [EventType.BeforeUpdate]?: EventHandlerFunctionType;
   [EventType.Updated]?: EventHandlerFunctionType;
   [EventType.BeforeDestroy]?: EventHandlerFunctionType;
@@ -59,7 +56,7 @@ export class IframeLoader extends BaseComponent {
     this.iframeId = '';
     this.disposed = false;
     this.onMessageRecieved = this.windowMessageHandler.bind(this);
-    this.getWindow().addEventListener('message', this.onMessageRecieved);
+    window.addEventListener('message', this.onMessageRecieved);
     this.init();
   }
 
@@ -74,9 +71,8 @@ export class IframeLoader extends BaseComponent {
       this.rootElement.parentElement?.removeChild(this.rootElement);
     }
 
-    if (this.onMessageRecieved) {
-      window.removeEventListener('message', this.onMessageRecieved);
-    }
+    this.getWindow().removeEventListener('message', <MessageEventHandlerFunctionType>this.onMessageRecieved);
+    this.onMessageRecieved = null;
 
     this.triggerEvent(EventType.Destroyed);
     this.options = null;
@@ -84,15 +80,17 @@ export class IframeLoader extends BaseComponent {
   }
 
   private init(): void {
+    this.triggerEvent(EventType.BeforeCreate);
+
     this.createRootElement();
-    this.mountIframe();
+    this.cerateIframe();
+
+    this.triggerEvent(EventType.Created);
   }
 
-  private mountIframe(): void {
+  private cerateIframe(): void {
     if (this.getIframe())
       return;
-
-    this.triggerEvent(EventType.BeforeMount);
 
     const iframe = this.getDocument().createElement('iframe');
     if (this.options?.iframeAttributes) {
@@ -108,21 +106,16 @@ export class IframeLoader extends BaseComponent {
     }
     this.iframeId = generateUniqueId(this.getDocument(), 'ildr-');
     (<HTMLDivElement>this.rootElement).append(iframe);
-
-    this.triggerEvent(EventType.Mounted);
   }
 
   private createRootElement(): void {
     if (this.rootElement)
       return;
 
-    this.triggerEvent(EventType.BeforeCreate);
-
     const parent = this.getParentElement();
     this.rootElement = this.getDocument().createElement('div');
     parent.appendChild(this.rootElement);
 
-    this.triggerEvent(EventType.Created);
   }
 
   private getParentElement(): HTMLElement {
@@ -178,13 +171,13 @@ export class IframeLoader extends BaseComponent {
       return;
     }
 
-    if (messageData.id) {
-      // Child did not send an ID so let's end it again
-      const message: IframeMessage = {
-        id: this.iframeId
-      }
-      this.getIframe()?.contentWindow?.postMessage(message, this.getIframeOrigin());
+    if (this.shouldShakeHands(messageData)) {
+      this.shakeHands(messageData);
+      return;
     }
+
+    if (!messageData.id)
+      return;
 
     this.triggerEvent(messageData.busy ? EventType.BeforeUpdate : EventType.Updated);
 
@@ -196,26 +189,63 @@ export class IframeLoader extends BaseComponent {
   private getIframeOrigin(): string {
     return getUrlOrigin(this.getDocument(), (<IframeLoaderOptions>this.options).url);
   }
+
+  private shouldShakeHands(message: IframeMessage): boolean {
+    // Handshake did not take place
+    if (!message.id)
+      return true;
+
+    return false;
+  }
+
+  private shakeHands(requestMessage: IframeMessage): void {
+    const hash = getHashCode(this.iframeId).toString(10);
+    const responseMessage: IframeMessage = {
+      id: ''
+    };
+
+    // We got a message back so if the data matches the hash we sent send the id
+    if (requestMessage.data && requestMessage.data === hash) {
+      responseMessage.id = this.iframeId;
+    } else {
+      responseMessage.data = hash;
+    }
+
+
+    this.getIframe()?.contentWindow?.postMessage(responseMessage, this.getIframeOrigin());
+  }
 }
 
 export class IframeContent extends BaseComponent {
   private iframeId: string;
   private parentOrigin: string;
   private onMessageRecieved: null | MessageEventHandlerFunctionType;
+  private messageQueue: Array<IframeMessage>;
+  private standalone: boolean;
   private disposed: boolean;
 
   constructor(window: Window, parentOrigin: string) {
     super(window);
     if (typeof parentOrigin !== 'string' || parentOrigin.length === 0)
-      throw new Error(`Parent origin should be a non-empty string.`);
+      throw new Error(`Parent origin("parentOrigin") should be a non-empty string.`);
 
+    this.standalone = window === window.parent;
     this.parentOrigin = parentOrigin;
     this.iframeId = '';
+    this.messageQueue = new Array<IframeMessage>();
     this.disposed = false;
-    this.onMessageRecieved = this.windowMessageHandler.bind(this);
-    this.getWindow().addEventListener('message', this.onMessageRecieved);
+    if (this.standalone) {
+      this.onMessageRecieved = null;
+    } else {
+      this.onMessageRecieved = this.windowMessageHandler.bind(this);
+      window.addEventListener('message', this.onMessageRecieved);
+    }
 
     this.init();
+  }
+
+  public signalBusyState(busy: boolean): void {
+    this.sendMessage({ id: this.iframeId, busy: busy });
   }
 
   public dispose(): void {
@@ -223,25 +253,24 @@ export class IframeContent extends BaseComponent {
       return;
 
     this.disposed = true;
-    this.sendMessage({ id: this.iframeId, busy: true });
+    this.signalBusyState(true);
 
     if (this.onMessageRecieved) {
-      window.removeEventListener('message', this.onMessageRecieved);
+      this.getWindow().removeEventListener('message', this.onMessageRecieved);
+      this.onMessageRecieved = null;
     }
 
-    this.sendMessage({ id: this.iframeId, destroyed: true });
+    this.sendMessage({ id: '', destroyed: true });
     super.dispose();
   }
 
   private init(): void {
-    this.sendMessage({ id: this.iframeId, busy: true });
+    // Bypass the queue and initiate the handshake.
+    this.sendMessage({ id: this.iframeId }, true);
+    this.signalBusyState(true);
   }
 
   private windowMessageHandler(event: MessageEvent): void {
-    const win = this.getWindow();
-    if (win === win.parent)
-      return;
-
     if (event.origin !== this.parentOrigin)
       return;
 
@@ -253,16 +282,49 @@ export class IframeContent extends BaseComponent {
       return;
     }
 
-    if (!this.iframeId && messageData.id) {
-      this.iframeId = messageData.id;
+    // In case we do not have the iframeId it means handshake did not happen.
+    if (!this.iframeId) {
+      this.handShake(messageData);
     }
   }
 
-  private sendMessage(message: IframeMessage): void {
-    const win = this.getWindow();
-    if (win === win.parent)
+  private handShake(messageData: IframeMessage) {
+    if (!messageData.id) {
+      // Phase 1 of the handshake - we got the hash so send it back.
+      this.sendMessage({ id: this.iframeId, busy: true, data: messageData.data }, true);
+    }
+    else {
+      // Phase 2 of the handshake - we got the id.
+      this.iframeId = messageData.id;
+
+      // Send the previously queued messages.
+      this.flushMessages();
+    }
+  }
+
+  private sendMessage(message: IframeMessage, bypassQueue: boolean = false): void {
+    if (this.standalone)
       return;
 
-    win.parent.postMessage(message, this.parentOrigin)
+    if (this.iframeId && !message.id) {
+      // Override the message id in case we have iframeId
+      message.id = this.iframeId;
+    }
+
+    if (bypassQueue || message.id) {
+      this.getWindow().parent.postMessage(message, this.parentOrigin);
+    } else {
+      this.messageQueue.push(message);
+    }
+  }
+
+  private flushMessages(): void {
+    const win = this.getWindow();
+
+    for (let index = 0; index < this.messageQueue.length; index++) {
+      const msg = this.messageQueue[index];
+      msg.id = this.iframeId;
+      win.parent.postMessage(msg, this.parentOrigin);
+    }
   }
 }

@@ -1,3 +1,4 @@
+
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
@@ -13,7 +14,8 @@ function overrideFormSubmit(win: Window, req: IframeHttpRequest, overrideFunc: (
   };
 }
 
-export function test_iframeHttpRequest() {
+export function test_iframeLoader_loader() {
+  return;
   describe('IframeHttpRequestOptions', () => {
     it('should have public getters and setters', () => {
       const options: IframeHttpRequestOptions = {

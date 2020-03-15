@@ -1,1 +1,1 @@
-export const falsies = [undefined, null, false, '', []];
+export const falsies = [undefined, null, false, ''];
