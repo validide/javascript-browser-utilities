@@ -1,8 +1,8 @@
 import 'mocha';
-import { generateUniqueId } from '../../src/index';
+import { generateUniqueId } from '../../../src/index';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { falsies } from '../utils';
+import { falsies } from '../../utils';
 
 function getNewDocument(): Document { return new JSDOM(`<!DOCTYPE html>`).window.document };
 

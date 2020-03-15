@@ -1,5 +1,5 @@
 import 'mocha';
-import { appendDataToForm } from '../../src/index';
+import { appendDataToForm } from '../../../src/index';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 

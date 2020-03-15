@@ -1,7 +1,5 @@
-import { testFromModule } from './form/index.spec';
-import { testDocumentModule } from './document/index.spec';
-import { testIframeModule } from './iframe/index.spec';
+import { test_dom } from './dom/index.spec';
+import { test_infrastructure } from './infrastructure/index.spec';
 
-testDocumentModule();
-testFromModule();
-testIframeModule();
+test_dom();
+test_infrastructure();

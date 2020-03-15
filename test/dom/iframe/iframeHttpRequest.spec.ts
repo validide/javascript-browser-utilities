@@ -1,8 +1,8 @@
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { IframeHttpRequest, IframeHttpRequestOptions, IframeHttpResponse } from '../../src/iframe/iframeHttpRequest';
-import { falsies } from '../utils';
+import { IframeHttpRequest, IframeHttpRequestOptions, IframeHttpResponse } from '../../../src/dom/iframe/iframeHttpRequest';
+import { falsies } from '../../utils';
 
 function overrideFormSubmit(win: Window, req: IframeHttpRequest, overrideFunc: () => void) {
   //JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit

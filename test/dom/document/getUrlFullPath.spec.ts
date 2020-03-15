@@ -1,5 +1,5 @@
 import 'mocha';
-import { getUrlFullPath } from '../../src/index';
+import { getUrlFullPath } from '../../../src/index';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 

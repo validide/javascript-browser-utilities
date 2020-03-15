@@ -1,6 +1,7 @@
 import { generateUniqueId } from '../document/generateIds';
 import { appendDataToForm } from '../form/appendDataToForm';
 import { getUrlFullPath } from '../document/getUrlFullPath';
+import { BaseComponent } from '../../contracts';
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;
@@ -29,8 +30,7 @@ export interface IframeHttpResponse {
 /**
  * Make a HTTP request using an iframe
  */
-export class IframeHttpRequest {
-  private window: Window | null;
+export class IframeHttpRequest extends BaseComponent {
   private url: string;
   private data: object | null = null;
   private method: string = 'GET';
@@ -68,8 +68,9 @@ export class IframeHttpRequest {
     method: string = 'GET',
     options: IframeHttpRequestOptions | null = null
   ) {
+    super(window);
+
     this.validateInput(window, url, method);
-    this.window = window;
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
     this.data = data;
     this.method = method;
@@ -114,16 +115,13 @@ export class IframeHttpRequest {
     this.loadHandlerRef = null;
     this.resolvePromise = null;
     this.rejectPromise = null;
-    this.window = null;
     this.url = '';
     this.method = '';
     this.wrapperId = '';
+    super.dispose();
   }
 
   private validateInput(window: Window, url: string, method: string): void {
-    if (!window)
-      throw new Error('Missing "window" reference.');
-
     if (!url)
       throw new Error('Missing "url" reference.');
 
@@ -231,8 +229,4 @@ export class IframeHttpRequest {
     (<RejectPromiseFunctionType>this.rejectPromise)({ data: '', error: error });
     this.dispose();
   }
-
-  private getWindow(): Window { return <Window>this.window; }
-
-  private getDocument(): Document { return this.getWindow().document; }
 }
