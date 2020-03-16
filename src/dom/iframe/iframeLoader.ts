@@ -10,7 +10,7 @@ interface IframeMessage {
 }
 type MessageEventHandlerFunctionType = (e: MessageEvent) => void;
 
-export enum EventType {
+export enum IframeLoaderEventType {
   BeforeCreate = 'beforeCreate',
   Created = 'created',
   BeforeUpdate = 'beforeUpdate',
@@ -20,26 +20,26 @@ export enum EventType {
 }
 
 export interface IframeLoaderEvent {
-  type: EventType,
+  type: IframeLoaderEventType,
   el: HTMLElement | null
 }
 
 export type EventHandlerFunctionType = (e: IframeLoaderEvent) => void;
 
 export interface IframeLoaderEvents {
-  [EventType.BeforeCreate]?: EventHandlerFunctionType;
-  [EventType.Created]?: EventHandlerFunctionType;
-  [EventType.BeforeUpdate]?: EventHandlerFunctionType;
-  [EventType.Updated]?: EventHandlerFunctionType;
-  [EventType.BeforeDestroy]?: EventHandlerFunctionType;
-  [EventType.Destroyed]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.BeforeCreate]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.Created]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.BeforeUpdate]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.Updated]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.BeforeDestroy]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.Destroyed]?: EventHandlerFunctionType;
 }
 
 export interface IframeLoaderOptions {
   url: string;
   parent?: string | HTMLElement;
   events?: IframeLoaderEvents;
-  iframeAttributes?: { [name: string]: string; }
+  iframeAttributes?: { [key: string]: string; }
 }
 
 export class IframeLoader extends BaseComponent {
@@ -51,6 +51,9 @@ export class IframeLoader extends BaseComponent {
 
   constructor(window: Window, options: IframeLoaderOptions) {
     super(window);
+    if (!options?.url)
+      throw new Error('The "options.url" value should be a non-empty string.');
+
     this.options = options;
     this.rootElement = null;
     this.iframeId = '';
@@ -65,27 +68,26 @@ export class IframeLoader extends BaseComponent {
       return;
 
     this.disposed = true;
-    this.triggerEvent(EventType.BeforeDestroy);
+    this.triggerEvent(IframeLoaderEventType.BeforeDestroy);
 
-    if (this.rootElement) {
-      this.rootElement.parentElement?.removeChild(this.rootElement);
-    }
+    (<HTMLElement>(<HTMLDivElement>this.rootElement).parentElement).removeChild(<HTMLDivElement>this.rootElement);
+    this.rootElement = null;
 
     this.getWindow().removeEventListener('message', <MessageEventHandlerFunctionType>this.onMessageRecieved);
     this.onMessageRecieved = null;
 
-    this.triggerEvent(EventType.Destroyed);
+    this.triggerEvent(IframeLoaderEventType.Destroyed);
     this.options = null;
     super.dispose();
   }
 
   private init(): void {
-    this.triggerEvent(EventType.BeforeCreate);
+    this.triggerEvent(IframeLoaderEventType.BeforeCreate);
 
     this.createRootElement();
     this.cerateIframe();
 
-    this.triggerEvent(EventType.Created);
+    this.triggerEvent(IframeLoaderEventType.Created);
   }
 
   private cerateIframe(): void {
@@ -93,19 +95,18 @@ export class IframeLoader extends BaseComponent {
       return;
 
     const iframe = this.getDocument().createElement('iframe');
-    if (this.options?.iframeAttributes) {
-      for (const key in this.options.iframeAttributes) {
-        if (this.options.iframeAttributes.hasOwnProperty(key)) {
-          iframe.setAttribute(key, this.options.iframeAttributes[key])
-        }
+    const opt = this.getOptions();
+    if (opt.iframeAttributes) {
+      const keys = Object.keys(opt.iframeAttributes);
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index];
+        iframe.setAttribute(key, opt.iframeAttributes[key])
       }
     }
 
-    if (this.options?.url) {
-      iframe.setAttribute('src', this.options.url);
-    }
+    iframe.setAttribute('src', opt.url);
     this.iframeId = generateUniqueId(this.getDocument(), 'ildr-');
-    (<HTMLDivElement>this.rootElement).append(iframe);
+    (<HTMLDivElement>this.rootElement).appendChild(iframe);
   }
 
   private createRootElement(): void {
@@ -121,26 +122,26 @@ export class IframeLoader extends BaseComponent {
   private getParentElement(): HTMLElement {
     let parent: HTMLElement | null = null;
 
-    if (this.options?.parent) {
-      if (typeof this.options.parent === 'string') {
-        if (this.options.parent.length) {
-          parent = this.getDocument().querySelector(this.options.parent);
-        }
+    const opt = this.getOptions();
+    if (opt.parent) {
+      if (typeof opt.parent === 'string') {
+        parent = this.getDocument().querySelector(opt.parent);
       }
       else {
-        parent = this.options.parent;
+        parent = opt.parent;
       }
     }
 
     if (!parent)
-      throw new Error(`Failed to find parent "${this.options?.parent}".`);
+      throw new Error(`Failed to find parent "${opt.parent}".`);
 
     return parent;
   }
 
-  private triggerEvent(eventType: EventType): void {
-    const handler = this.options?.events
-      ? this.options.events[eventType]
+  private triggerEvent(eventType: IframeLoaderEventType): void {
+    const opt = this.getOptions();
+    const handler = opt.events
+      ? opt.events[eventType]
       : undefined;
 
     if (handler) {
@@ -152,11 +153,7 @@ export class IframeLoader extends BaseComponent {
   }
 
   private getIframe(): HTMLIFrameElement | null {
-    if (this.rootElement) {
-      return this.rootElement.querySelector('iframe');
-    }
-
-    return null;
+    return (<HTMLDivElement>this.rootElement).querySelector('iframe');
   }
 
   private windowMessageHandler(event: MessageEvent): void {
@@ -176,18 +173,22 @@ export class IframeLoader extends BaseComponent {
       return;
     }
 
-    if (!messageData.id)
+    if (!messageData.id || messageData.id !== this.iframeId)
       return;
-
-    this.triggerEvent(messageData.busy ? EventType.BeforeUpdate : EventType.Updated);
 
     if (messageData.destroyed) {
       this.dispose();
+    } else {
+      this.triggerEvent(messageData.busy ? IframeLoaderEventType.BeforeUpdate : IframeLoaderEventType.Updated);
     }
   }
 
   private getIframeOrigin(): string {
-    return getUrlOrigin(this.getDocument(), (<IframeLoaderOptions>this.options).url);
+    return getUrlOrigin(this.getDocument(), this.getOptions().url);
+  }
+
+  private getOptions(): IframeLoaderOptions {
+    return (<IframeLoaderOptions>this.options);
   }
 
   private shouldShakeHands(message: IframeMessage): boolean {
@@ -211,8 +212,7 @@ export class IframeLoader extends BaseComponent {
       responseMessage.data = hash;
     }
 
-
-    this.getIframe()?.contentWindow?.postMessage(responseMessage, this.getIframeOrigin());
+    (<Window>(<HTMLIFrameElement>this.getIframe()).contentWindow).postMessage(responseMessage, this.getIframeOrigin());
   }
 }
 

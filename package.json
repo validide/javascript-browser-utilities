@@ -24,7 +24,9 @@
     "clean": "node ./.build/clean.js",
     "prebuild": "npm run clean",
     "build": "tsc --module es2015 && node ./.build/minify.js",
-    "test": "nyc mocha"
+    "test": "nyc mocha",
+    "predocs": "npm run test && npm run build",
+    "docs": "rm -rf ./docs/dist && cp -R ./dist/js ./docs/dist"
   },
   "repository": {
     "type": "git",

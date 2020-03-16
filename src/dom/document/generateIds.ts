@@ -8,8 +8,8 @@ import { getRandomString } from "../../infrastructure";
 function generateUniqueId(document: Document, prefix: string = ''): string {
   const prefixString = (prefix ?? '');
   while(true) {
-    // The 'I' will ensure this is always a valid JavaScript ID
-    const id = prefixString + 'A' + getRandomString() + getRandomString();
+    // The 'A-' will ensure this is always a valid JavaScript ID
+    const id = prefixString + 'A-' + getRandomString() + getRandomString();
 
     if (document.getElementById(id) === null) {
       return id;

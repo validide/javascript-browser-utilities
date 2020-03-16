@@ -117,11 +117,10 @@ export function test_iframeHttpRequest() {
       ).not.throws();
     })
 
-    it('calling send with falsie data does not throw', () => {
-      falsies.forEach(falsie => {
+    falsies.forEach(falsie => {
+      it(`calling send with falsie(${falsie}) data does not throw`, () => {
         expect(
           () => {
-
             const req = new IframeHttpRequest(_win, 'http://localhost/', <object>(<unknown>falsie));
             overrideFormSubmit(_win, req, () => { });
 
@@ -129,8 +128,9 @@ export function test_iframeHttpRequest() {
             req.dispose();
           }
         ).not.throws()
-      });
-    })
+      })
+    });
+
 
     it('calling dispose after calling send works', () => {
       expect(
