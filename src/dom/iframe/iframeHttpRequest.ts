@@ -189,7 +189,7 @@ export class IframeHttpRequest extends BaseComponent {
       const targetPath = getUrlFullPath(contentWindow.document, contentWindow.location.href).toLowerCase();
       const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase()
       const result:IframeHttpResponse = {
-        data: contentWindow.document.body.innerHTML,
+        data: <string>contentWindow.document.body.textContent,
         error: null
       };
 

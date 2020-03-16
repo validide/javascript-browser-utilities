@@ -10,6 +10,7 @@
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
     integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous" />
+  <script type="text/template" data></script>
 </head>
 
 <body>
@@ -18,16 +19,59 @@
   </div>
 
   <div class="container">
-    <h1>TO DO</h1>
-    <pre><code class="html">Some escaped code to highlight here</code></pre>
-    <pre><code class="js">
-      var a = new window.validide_jbu.IframeLoader(
-        window,
-        {
-          url: 'https://en.wikipedia.org/wiki/JavaScript',
-          parent: 'body'
-        });
-    </code></pre>
+    <h1>JavaScript Browser Utilities</h1>
+    <section>
+      <hr />
+      <h2>Status</h2>
+      <a href="https://coveralls.io/github/validide/javascript-browser-utilities?branch=master" rel="nofollow"><img
+          src="https://camo.githubusercontent.com/d940f68be39942d07afcb09e80706292da4b6e32/68747470733a2f2f636f766572616c6c732e696f2f7265706f732f6769746875622f76616c69646964652f6a6176617363726970742d62726f777365722d7574696c69746965732f62616467652e7376673f6272616e63683d6d6173746572"
+          alt="Coverage Status"
+          data-canonical-src="https://coveralls.io/repos/github/validide/javascript-browser-utilities/badge.svg?branch=master"
+          style="max-width:100%;"></a>
+      <a href="https://www.npmjs.com/package/@validide/javascript-browser-utilities" rel="nofollow"><img
+          src="https://camo.githubusercontent.com/76c1facf609779b4f34fc0e49b76388ae98fbb17/68747470733a2f2f696d672e736869656c64732e696f2f6e706d2f762f4076616c69646964652f6a6176617363726970742d62726f777365722d7574696c6974696573"
+          alt="npm version" data-canonical-src="https://img.shields.io/npm/v/@validide/javascript-browser-utilities"
+          style="max-width:100%;"></a>
+      <a href="https://github.com/validide/javascript-browser-utilities/issues"><img alt="GitHub issues"
+          src="https://img.shields.io/github/issues/validide/javascript-browser-utilities"></a>
+      <a href="https://github.com/validide/javascript-browser-utilities/stargazers"><img alt="GitHub stars"
+          src="https://img.shields.io/github/stars/validide/javascript-browser-utilities"></a>
+      <a href="https://github.com/validide/javascript-browser-utilities/blob/master/LICENSE"><img alt="GitHub license"
+          src="https://img.shields.io/github/license/validide/javascript-browser-utilities"></a>
+    </section>
+
+    <section>
+      <hr />
+      <h2>IFRAME MODULE</h2>
+      <article>
+        <h3>iframeHttpRequest</h3>
+        <p>Send a HTTP request using an IFRAME.</p>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6" data-code="js-IframeHttpRequest"></div>
+            <div class="col-md-6" id="result_IframeHttpRequest">
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <section>
+      <hr />
+      <h2>UTILD MODULE</h2>
+      <article>
+        <h3>TO DO</h3>
+        <p>TO DO</p>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12" data-code="html-unescaped-code"></div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </section>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -45,8 +89,44 @@
     integrity="sha256-JEmpYI2Z16TgFAij82HWStfsanuGknz7sCDYdOjbj60=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/javascript.min.js"
     integrity="sha256-7m7j1FpXjzQA3XImtaWCPdm6JrXZFd1rjRiKes8kJO8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/json.min.js"
+    integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
   <script src="./dist/bundle/index.js"></script>
-  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="./js/app.js"></script>
+
+  <script data-lang="js" id="js-IframeHttpRequest">
+    var request = new window.validide_jbu.IframeHttpRequest(
+      window,
+      './data/random.json',
+      null,
+      'GET',
+      {
+        timeout: 30_000,
+        redirectTimeout: 1_000
+      }
+    );
+    var container = window.document
+      .getElementById('result_IframeHttpRequest');
+    request.sendAsync().then(
+      function (res) {
+        window.app.removeSpinner(container);
+        if (res.data) {
+          window.app.appendAsCode(container, res.data, 'json');
+        } else {
+          window.app.appendAsCode(container, res.error.message);
+        }
+      },
+      function (err) {
+        window.app.removeSpinner(container);
+        window.app.appendAsCode(container, err.error.message);
+      }
+    );
+    window.app.addSpinner(container);
+  </script>
+  <script type="text/template" data-lang="html" id="html-unescaped-code">
+    <p> HTML HERE <span style="color: red;">AAA</span> </p>
+  </script>
+
 </body>
 
 </html>
