@@ -1,7 +1,7 @@
 import { generateUniqueId } from '../document/generateIds';
 import { appendDataToForm } from '../form/appendDataToForm';
 import { getUrlFullPath } from '../document/getUrlFullPath';
-import { BaseComponent } from '../../contracts';
+import { BaseComponent } from '../../contracts/index';
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;

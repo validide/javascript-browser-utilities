@@ -10,7 +10,8 @@
     "test/**/*.*",
     "dist/**/*.*",
     "coverage/**/*.*",
-    ".build/**/*.*"
+    ".build/**/*.*",
+    "rollup.config.js"
   ],
   "reporter": [
     "text",

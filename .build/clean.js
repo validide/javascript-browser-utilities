@@ -4,7 +4,8 @@ const rimraf = require("rimraf");
 const pathsToClean = [
   "./.nyc_output",
   "./coverage",
-  "./dist"
+  "./dist",
+  "./docs/dist"
 ];
 
 for (let i = 0; i < pathsToClean.length; i++) {

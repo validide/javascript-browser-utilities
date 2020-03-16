@@ -1,6 +1,6 @@
-import { BaseComponent } from "../../contracts";
-import { generateUniqueId, getUrlOrigin } from "../document";
-import { getHashCode } from "../../infrastructure";
+import { BaseComponent } from "../../contracts/index";
+import { generateUniqueId, getUrlOrigin } from "../document/index";
+import { getHashCode } from "../../infrastructure/index";
 
 interface IframeMessage {
   id: string;

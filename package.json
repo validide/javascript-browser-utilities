@@ -15,6 +15,7 @@
     "mocha": "7.1.0",
     "nyc": "15.0.0",
     "rimraf": "3.0.2",
+    "rollup": "2.0.6",
     "source-map-support": "0.5.16",
     "ts-node": "8.6.2",
     "typescript": "3.8.3",
@@ -23,10 +24,10 @@
   "scripts": {
     "clean": "node ./.build/clean.js",
     "prebuild": "npm run clean",
-    "build": "tsc --module es2015 && node ./.build/minify.js",
+    "build": "tsc --module es2015 && rollup --config ./rollup.config.js && node ./.build/minify.js",
     "test": "nyc mocha",
     "predocs": "npm run test && npm run build",
-    "docs": "rm -rf ./docs/dist && cp -R ./dist/js ./docs/dist"
+    "docs": "rollup --config ./rollup.config.js --dir ./docs/dist/bundle/"
   },
   "repository": {
     "type": "git",
