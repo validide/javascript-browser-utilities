@@ -46,7 +46,7 @@ export class IframeHttpRequest extends BaseComponent {
   private disposed: boolean;
 
   /**
-   * Default options [[IframeHttpRequestOptions]]
+   * Default options IframeHttpRequestOptions
    */
   public static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
@@ -59,7 +59,7 @@ export class IframeHttpRequest extends BaseComponent {
    * @param url The url to make the request to
    * @param data The data to send. Default NULL
    * @param method The HTTP method. GET(default) or POST
-   * @param options The request options [[IframeHttpRequestOptions]]. Default null and will use the [[IframeHttpRequest.DEFAULT_OPTIONS]]
+   * @param options The request options IframeHttpRequestOptions. Default null and will use the IframeHttpRequest.DEFAULT_OPTIONS
    */
   constructor(
     window: Window,
@@ -70,7 +70,7 @@ export class IframeHttpRequest extends BaseComponent {
   ) {
     super(window);
 
-    this.validateInput(window, url, method);
+    this.validateInput(url, method);
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
     this.data = data;
     this.method = method;
@@ -121,7 +121,7 @@ export class IframeHttpRequest extends BaseComponent {
     super.dispose();
   }
 
-  private validateInput(window: Window, url: string, method: string): void {
+  private validateInput(url: string, method: string): void {
     if (!url)
       throw new Error('Missing "url" reference.');
 

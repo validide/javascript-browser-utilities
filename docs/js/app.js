@@ -1,5 +1,29 @@
 (function (window, hljs, undefined) {
 
+  function getQueryParms() {
+    return parseQueryString(window.location.search.substring(1));
+  }
+  function parseQueryString(queryString) {
+    if (!queryString)
+      return {};
+
+    return JSON.parse(
+      '{"' + (queryString || '').replace(/&/g, '","').replace(/=/g, '":"') + '"}',
+      function (key, value) { return key === "" ? value : decodeURIComponent(value) }
+    )
+  }
+  function setQueryParms(data) {
+    var qs = '';
+    for (var key in data) {
+      if (data.hasOwnProperty(key)) {
+        qs += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(data[key]);
+      }
+    }
+    if (qs.length > 1)
+      window.location = window.location.href.split('?')[0] + '?' + qs.substring(1);
+    else
+      window.location.reload();
+  }
 
   function ready(fn) {
     if (window.document.readyState != 'loading') {
@@ -18,7 +42,7 @@
       }
 
       if (toTrim > 0) {
-        rows[index] = rows[index].substr(Math.min(toTrim, rows[index].search(/\S|$/)));
+        rows[index] = rows[index].substring(Math.min(toTrim, rows[index].search(/\S|$/)));
       }
     }
 
@@ -60,8 +84,11 @@
   window.app = {
     appendAsCode: appendAsCode,
     addSpinner: addSpinner,
+    getQueryParms: getQueryParms,
+    parseQueryString: parseQueryString,
     removeSpinner: removeSpinner,
     ready: ready,
+    setQueryParms: setQueryParms,
     init: init
   };
 })(window, window.hljs, void 0);

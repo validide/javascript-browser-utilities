@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html lang="en">
 
 <head>
   <meta charset="utf-8">
@@ -10,7 +10,6 @@
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
     integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous" />
-  <script type="text/template" data></script>
 </head>
 
 <body>
@@ -44,7 +43,7 @@
       <hr />
       <h2>IFRAME MODULE</h2>
       <article>
-        <h3>iframeHttpRequest</h3>
+        <h3>Simple</h3>
         <p>Send a HTTP request using an IFRAME.</p>
         <div class="container">
           <div class="row">
@@ -54,23 +53,28 @@
           </div>
         </div>
       </article>
-
-    </section>
-
-    <section>
-      <hr />
-      <h2>UTILD MODULE</h2>
       <article>
-        <h3>TO DO</h3>
-        <p>TO DO</p>
+        <h3>Redirect without configuration</h3>
+        <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since `redirectTimeout` is 1s and the redirect delay is 1.5s we will wrongfully display the redirect page content.</p>
         <div class="container">
           <div class="row">
-            <div class="col-md-12" data-code="html-unescaped-code"></div>
+            <div class="col-md-6" data-code="js-IframeHttpRequest-redirect-wrong"></div>
+            <div class="col-md-6" id="result_wrong_IframeHttpRequest">
             </div>
           </div>
         </div>
       </article>
-
+      <article>
+        <h3>Redirect with configuration</h3>
+        <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since `redirectTimeout` is 2s and the redirect delay is 1.5s we will display the correct content.</p>
+        <div class="container">
+          <div class="row">
+            <div class="col-md-6" data-code="js-IframeHttpRequest-redirect-correct"></div>
+            <div class="col-md-6" id="result_correct_IframeHttpRequest">
+            </div>
+          </div>
+        </div>
+      </article>
     </section>
   </div>
 
@@ -93,38 +97,110 @@
     integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
   <script src="./dist/bundle/index.js"></script>
   <script src="./js/app.js"></script>
-
-  <script data-lang="js" id="js-IframeHttpRequest">
-    var request = new window.validide_jbu.IframeHttpRequest(
-      window,
-      './data/random.json',
-      null,
-      'GET',
-      {
-        timeout: 30_000,
-        redirectTimeout: 1_000
-      }
-    );
-    var container = window.document
-      .getElementById('result_IframeHttpRequest');
-    request.sendAsync().then(
-      function (res) {
-        window.app.removeSpinner(container);
-        if (res.data) {
-          window.app.appendAsCode(container, res.data, 'json');
-        } else {
-          window.app.appendAsCode(container, res.error.message);
+   <script data-lang="js" id="js-IframeHttpRequest">
+    (function () {
+      var request = new window.validide_jbu.IframeHttpRequest(
+        window,
+        './data/random.json',
+        null,
+        'GET',
+        {
+          timeout: 30_000,
+          redirectTimeout: 1_000
         }
-      },
-      function (err) {
-        window.app.removeSpinner(container);
-        window.app.appendAsCode(container, err.error.message);
-      }
-    );
-    window.app.addSpinner(container);
+      );
+      var container = window.document
+        .getElementById('result_IframeHttpRequest');
+      request.sendAsync().then(
+        function (res) {
+          window.app.removeSpinner(container);
+          if (res.data) {
+            window.app.appendAsCode(container, res.data, 'json');
+          } else {
+            window.app.appendAsCode(container, res.error.message);
+          }
+        },
+        function (err) {
+          window.app.removeSpinner(container);
+          window.app.appendAsCode(container, err.error.message);
+        }
+      );
+      window.app.addSpinner(container);
+    })();
   </script>
-  <script type="text/template" data-lang="html" id="html-unescaped-code">
-    <p> HTML HERE <span style="color: red;">AAA</span> </p>
+  <script data-lang="js" id="js-IframeHttpRequest-redirect-wrong">
+    (function () {
+      var request = new window.validide_jbu.IframeHttpRequest(
+        window,
+        'http://localhost:8000/redirect.html',
+        {
+          iterate: 5,
+          url: window.validide_jbu.getUrlFullPath(window.document, './data/random.json')
+        },
+        'GET',
+        {
+          timeout: 30_000,
+          redirectTimeout: 1_000
+        }
+      );
+      var container = window.document
+        .getElementById('result_wrong_IframeHttpRequest');
+      var prom = request.sendAsync();
+      // fake the url to allow the redirect - for testing only
+      request.url = 'http://foo.bar/';
+      prom.then(
+        function (res) {
+          window.app.removeSpinner(container);
+          if (res.data) {
+            window.app.appendAsCode(container, res.data, 'html');
+          } else {
+            window.app.appendAsCode(container, res.error.message);
+          }
+        },
+        function (err) {
+          window.app.removeSpinner(container);
+          window.app.appendAsCode(container, err.error.message);
+        }
+      );
+      window.app.addSpinner(container);
+    })();
+  </script>
+  <script data-lang="js" id="js-IframeHttpRequest-redirect-correct">
+    (function () {
+      var request = new window.validide_jbu.IframeHttpRequest(
+        window,
+        './redirect.html',
+        {
+          iterate: 2,
+          url: window.validide_jbu.getUrlFullPath(window.document, './data/random.json')
+        },
+        'GET',
+        {
+          timeout: 30_000,
+          redirectTimeout: 2_000
+        }
+      );
+      var container = window.document
+        .getElementById('result_correct_IframeHttpRequest');
+      var prom = request.sendAsync();
+      // fake the url to allow the redirect - for testing only
+      request.url = 'http://foo.bar/';
+      prom.then(
+        function (res) {
+          window.app.removeSpinner(container);
+          if (res.data) {
+            window.app.appendAsCode(container, res.data, 'json');
+          } else {
+            window.app.appendAsCode(container, res.error.message);
+          }
+        },
+        function (err) {
+          window.app.removeSpinner(container);
+          window.app.appendAsCode(container, err.error.message);
+        }
+      );
+      window.app.addSpinner(container);
+    })();
   </script>
 
 </body>

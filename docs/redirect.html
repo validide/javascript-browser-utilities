@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>JavaScript Browser Utilities</title>
+  <meta name="description" content="JavaScript Browser Utilities Library">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+
+<body>
+  <p id="redirect-info">Redirecting: </p>
+  <script src="./js/app.js"></script>
+  <script>
+    var params = window.app.getQueryParms();
+    var iterate = parseInt(params['iterate'] || '0', 10);
+    window.document.getElementById('redirect-info').textContent += JSON.stringify(params);
+    setTimeout(function () {
+      if (isNaN(iterate) || iterate < 1) {
+        var url = params['url'] || '';
+        if (url) {
+          window.location = url;
+        }
+      } else {
+        params['iterate'] = --iterate;
+        window.app.setQueryParms(params);
+      }
+    }, 1500);
+  </script>
+</body>
+
+</html>

@@ -10,6 +10,10 @@ interface IframeMessage {
 }
 type MessageEventHandlerFunctionType = (e: MessageEvent) => void;
 
+/**
+ * IframeLoader event types.
+ * The type of IframeLoaderEvent
+ */
 export enum IframeLoaderEventType {
   BeforeCreate = 'beforeCreate',
   Created = 'created',
@@ -19,13 +23,23 @@ export enum IframeLoaderEventType {
   Destroyed = 'destroyed'
 }
 
+/**
+ * IframeLoader Event
+ * These are triggered in different life-cycle phases
+ */
 export interface IframeLoaderEvent {
   type: IframeLoaderEventType,
   el: HTMLElement | null
 }
 
+/**
+ * Life-cycle event hander type
+ */
 export type EventHandlerFunctionType = (e: IframeLoaderEvent) => void;
 
+/**
+ * Life-cycle event hooks
+ */
 export interface IframeLoaderEvents {
   [IframeLoaderEventType.BeforeCreate]?: EventHandlerFunctionType;
   [IframeLoaderEventType.Created]?: EventHandlerFunctionType;
@@ -35,6 +49,9 @@ export interface IframeLoaderEvents {
   [IframeLoaderEventType.Destroyed]?: EventHandlerFunctionType;
 }
 
+/**
+ * IframeLoader options
+ */
 export interface IframeLoaderOptions {
   url: string;
   parent?: string | HTMLElement;
@@ -42,6 +59,10 @@ export interface IframeLoaderOptions {
   iframeAttributes?: { [key: string]: string; }
 }
 
+/**
+ * Iframe loader
+ * Load remote content inside an IFRAME.
+ */
 export class IframeLoader extends BaseComponent {
   private options: IframeLoaderOptions | null;
   private rootElement: HTMLDivElement | null;
@@ -49,6 +70,11 @@ export class IframeLoader extends BaseComponent {
   private onMessageRecieved: null | MessageEventHandlerFunctionType;
   private disposed: boolean;
 
+  /**
+   * Constructor.
+   * @param window Reference to the window object.
+   * @param options Loader options.
+   */
   constructor(window: Window, options: IframeLoaderOptions) {
     super(window);
     if (!options?.url)
@@ -63,6 +89,9 @@ export class IframeLoader extends BaseComponent {
     this.init();
   }
 
+  /**
+   * Dispose the loader
+   */
   public dispose(): void {
     if (this.disposed)
       return;
@@ -216,6 +245,9 @@ export class IframeLoader extends BaseComponent {
   }
 }
 
+/**
+ * Content loaded by IframeLoader
+ */
 export class IframeContent extends BaseComponent {
   private iframeId: string;
   private parentOrigin: string;
@@ -224,6 +256,11 @@ export class IframeContent extends BaseComponent {
   private standalone: boolean;
   private disposed: boolean;
 
+  /**
+   * Constructor
+   * @param window Reference to the window object
+   * @param parentOrigin The origin that loaded the content
+   */
   constructor(window: Window, parentOrigin: string) {
     super(window);
     if (typeof parentOrigin !== 'string' || parentOrigin.length === 0)
@@ -244,10 +281,17 @@ export class IframeContent extends BaseComponent {
     this.init();
   }
 
+  /**
+   * Signal busy state
+   * @param busy Is the component busy?
+   */
   public signalBusyState(busy: boolean): void {
     this.sendMessage({ id: this.iframeId, busy: busy });
   }
 
+  /**
+   * Dispose the component
+   */
   public dispose(): void {
     if (this.disposed)
       return;
