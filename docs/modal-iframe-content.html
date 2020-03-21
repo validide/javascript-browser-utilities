@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>JavaScript Browser Utilities</title>
+  <meta name="description" content="JavaScript Browser Utilities Library">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <link rel="stylesheet" href="./css/app.css" />
+  <link rel="icon" href="./favicon.ico" type="image/x-icon" />
+  <style>
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      background-color: #f8f9fa;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">JavaScript Browser Utilities</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <pre><code id="message"></code></pre>
+        </div>
+        <div class="modal-footer">
+          <a role="button" href="javascript:void(0)" class="btn btn-primary" id="action-busy">Save</a>
+          <a role="button" href="javascript:void(0)" class="btn btn-secondary" data-dismiss="modal">Cancel</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+    crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+    crossorigin="anonymous"></script>
+  <script src="./js/app.js"></script>
+  <script src="./lib/bundle/index.js"></script>
+
+  <script>
+    (function () {
+      var origin = validide_jbu.getUrlOrigin(document, window.location.href);
+      var parentOrigin = window.location.hostname === 'localhost'
+        ? window.location.origin
+        : validide_jbu.getUrlOrigin(document, window.location.href);
+      var iframeContent = new validide_jbu.IframeContent(window, parentOrigin);
+      var isChildFrame = window !== window.parent;
+
+
+      document.getElementById('message').textContent = 'This content is from: '
+        + '\n  - location: ' + window.location.href
+        + '\n  - origin: ' + origin
+        + '\n  - parentOrigin: ' + parentOrigin;
+
+      document.getElementById('action-busy').addEventListener('click', function (e) {
+        iframeContent.signalBusyState(true);
+        if (!isChildFrame) {
+          window.app.setPageLoadingState(true);
+        }
+
+        setTimeout(function () {
+          iframeContent.signalBusyState(false);
+          if (!isChildFrame) {
+            window.app.setPageLoadingState(false);
+          }
+        }, 5000);
+      });
+
+      var $modal = $('#exampleModal').modal({
+        show: isChildFrame ? false : true,
+        focus: isChildFrame ? false : true,
+        keyboard: isChildFrame ? true : false,
+        backdrop: isChildFrame ? true : 'static'
+      });
+
+      if (isChildFrame) {
+        // Simulate some long running process.
+        setTimeout(function () {
+          document.body.style.backgroundColor = 'transparent';
+
+          $modal
+            .modal('show')
+            .on('hide.bs.modal', function (e) {
+              iframeContent.dispose();
+            });
+
+          iframeContent.signalBusyState(false);
+        }, 2000);
+      } else {
+        document.getElementById('exampleModal')
+          .querySelectorAll('[data-dismiss="modal"]')
+          .forEach(f => f.style.display = 'none');
+      }
+    })();
+  </script>
+</body>
+
+</html>

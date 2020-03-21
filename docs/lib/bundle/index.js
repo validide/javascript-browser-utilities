@@ -385,7 +385,7 @@
                 handler({
                     type: eventType,
                     el: this.rootElement,
-                    rootEl: this.rootElement,
+                    parentEl: this.getParentElement(),
                     id: this.iframeId
                 });
             }

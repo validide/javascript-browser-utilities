@@ -30,7 +30,7 @@ export enum IframeLoaderEventType {
 export interface IframeLoaderEvent {
   type: IframeLoaderEventType;
   el: HTMLElement | null;
-  rootEl: HTMLElement | null;
+  parentEl: HTMLElement;
   id: string;
 }
 
@@ -179,7 +179,7 @@ export class IframeLoader extends BaseComponent {
       handler({
         type: eventType,
         el: this.rootElement,
-        rootEl: this.rootElement,
+        parentEl: this.getParentElement(),
         id: this.iframeId
       });
     }

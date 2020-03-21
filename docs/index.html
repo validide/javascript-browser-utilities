@@ -128,9 +128,21 @@
             </div>
           </div>
         </article>
+        <article>
+          <h3>Modal Content IframeLoader</h3>
+          <div class="container">
+            <div class="row">
+              <div class="col-12">
+                <a role="button" href="javascript:void(0)" class="btn btn-primary" id="open-modal">Open Modal</a>
+                <div data-code="js-IframeLoader-modal"></div>
+              </div>
+            </div>
+          </div>
+        </article>
       </section>
     </section>
   </div>
+
 
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
     integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
@@ -399,6 +411,74 @@
             'frameborder': 0
           }
         });
+    })();
+  </script>
+  <script data-lang="js" id="js-IframeLoader-modal">
+    (function () {
+      var contentLoader = null;
+      var btn = document.getElementById('open-modal');
+      btn.addEventListener('click', openModal);
+
+      function openModal(e) {
+        e.target.setAttribute('disabled', 'disabled');
+        if (contentLoader)
+          return; // Should not happen but better be safe.
+
+        contentLoader = new validide_jbu
+          .IframeLoader(window, {
+            url: './modal-iframe-content.html',
+            parent: 'body',
+            events: {
+              beforeCreate: eventHander,
+              created: eventHander,
+              beforeUpdate: eventHander,
+              updated: eventHander,
+              beforeDestroy: eventHander,
+              destroyed: eventHander
+            },
+            iframeAttributes: {
+              'allowtransparency': 'true',
+              'frameborder': 0
+            }
+          });
+      }
+
+      var eventHander = function (e) {
+        console.log(e);
+        switch (e.type) {
+          case 'beforeCreate': {
+            window.app.setPageLoadingState(true);
+            break;
+          }
+          case 'created': {
+            e.el.classList.add('d-none');
+            break;
+          }
+          case 'beforeUpdate': {
+            window.app.setPageLoadingState(true);
+            break;
+          }
+          case 'updated': {
+            e.el.classList.remove('d-none');
+            e.el.classList.add('iframe-modal-content');
+            window.app.setPageLoadingState(false);
+            break;
+          }
+          case 'beforeDestroy': {
+            window.app.setPageLoadingState(true);
+            break;
+          }
+          case 'destroyed': {
+            window.app.setPageLoadingState(false);
+            contentLoader = null;
+            btn.removeAttribute('disabled');
+            break;
+          }
+
+          default:
+            break;
+        }
+      };
     })();
   </script>
 </body>

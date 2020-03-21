@@ -85,6 +85,25 @@
     });
   }
 
+  function setPageLoadingState(loading) {
+    //loader-absolute
+    var globalLoader = document.getElementById('global-loading');
+    if (!globalLoader) {
+      globalLoader = document.createElement('div');
+      globalLoader.id = 'global-loading';
+      globalLoader.classList.add('d-none');
+      globalLoader.classList.add('loader-absolute');
+      globalLoader.innerHTML = '<div class="loader"></div>';
+      document.body.appendChild(globalLoader);
+    }
+
+    if (loading) {
+      globalLoader.classList.remove('d-none');
+    } else {
+      globalLoader.classList.add('d-none');
+    }
+  }
+
   function init() {
     highlight();
   }
@@ -97,6 +116,7 @@
     removeLoader: removeLoader,
     ready: ready,
     setQueryParms: setQueryParms,
+    setPageLoadingState: setPageLoadingState,
     init: init
   };
 })(window, window.hljs, void 0);
