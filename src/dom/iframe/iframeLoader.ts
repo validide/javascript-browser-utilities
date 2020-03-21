@@ -28,8 +28,10 @@ export enum IframeLoaderEventType {
  * These are triggered in different life-cycle phases
  */
 export interface IframeLoaderEvent {
-  type: IframeLoaderEventType,
-  el: HTMLElement | null
+  type: IframeLoaderEventType;
+  el: HTMLElement | null;
+  rootEl: HTMLElement | null;
+  id: string;
 }
 
 /**
@@ -176,7 +178,9 @@ export class IframeLoader extends BaseComponent {
     if (handler) {
       handler({
         type: eventType,
-        el: this.rootElement
+        el: this.rootElement,
+        rootEl: this.rootElement,
+        id: this.iframeId
       });
     }
   }

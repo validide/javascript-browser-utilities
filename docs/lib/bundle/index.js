@@ -384,7 +384,9 @@
             if (handler) {
                 handler({
                     type: eventType,
-                    el: this.rootElement
+                    el: this.rootElement,
+                    rootEl: this.rootElement,
+                    id: this.iframeId
                 });
             }
         }

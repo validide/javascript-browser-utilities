@@ -48,10 +48,12 @@
   <script>
     (function(){
       var origin = window.validide_jbu.getUrlOrigin(window.document, window.location.href);
-      var iframeContent = new window.validide_jbu.IframeContent(window, origin);
+      var parentOrigin = window.validide_jbu.getUrlOrigin(window.document, window.location.href);
+      var iframeContent = new window.validide_jbu.IframeContent(window, parentOrigin);
       window.document.getElementById('message').textContent = 'This content is from: '
         + '\n  - location: ' + window.location.href
-        + '\n  - origin: ' + origin;
+        + '\n  - origin: ' + origin
+        + '\n  - parentOrigin: ' + parentOrigin;
 
       window.document.getElementById('action-busy').addEventListener('click', function(e) {
         iframeContent.signalBusyState(true);

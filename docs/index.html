@@ -114,6 +114,10 @@
                     <h4>Result</h4>
                     <div id="result-IframeLoader-simple"></div>
                   </div>
+                  <div class="col-12 loader-absolute">
+                    <h4>Cross Domain Result</h4>
+                    <div id="result-IframeLoader-cross-domain"></div>
+                  </div>
                   <div class="col-12">
                     <h4>Events</h4>
                     <div id="console-IframeLoader-simple"></div>
@@ -181,7 +185,7 @@
     (function () {
       var request = new window.validide_jbu.IframeHttpRequest(
         window,
-        'http://localhost:8000/redirect.html',
+        './redirect.html',
         {
           iterate: 5,
           url: window.validide_jbu.getUrlFullPath(window.document, './data/random.json')
@@ -253,15 +257,13 @@
   </script>
   <script data-lang="js" id="js-IframeLoader-simple">
     (function () {
-      var contentContainer = window.document
-        .getElementById('result-IframeLoader-simple');
-        var consoleContainer = window.document
+      var consoleContainer = window.document
         .getElementById('console-IframeLoader-simple');
       var events = [];
-      var eventHander = function (e) {
+      var eventHander = function (e, contentContainer) {
         events.push(e);
 
-        switch(e.type) {
+        switch (e.type) {
           case 'beforeCreate': {
             window.app.addLoader(contentContainer);
             break;
@@ -297,7 +299,7 @@
         consoleContainer.innerHTML = '';
         window.app.appendAsCode(
           consoleContainer,
-          events.map(e => JSON.stringify(e)).join('\n'));
+          events.map(e => JSON.stringify(e, undefined, 2)).join('\n'));
       };
 
       var iframeContentLoader = new window.validide_jbu
@@ -305,18 +307,97 @@
           url: './simple-iframe-content.html',
           parent: '#result-IframeLoader-simple',
           events: {
-            beforeCreate: eventHander,
-            created: eventHander,
-            beforeUpdate: eventHander,
-            updated: eventHander,
-            beforeDestroy: eventHander,
-            destroyed: eventHander
+            beforeCreate: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple')
+              );
+            },
+            created: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple')
+              );
+            },
+            beforeUpdate: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple')
+              );
+            },
+            updated: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple')
+              );
+            },
+            beforeDestroy: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple')
+              );
+            },
+            destroyed: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-simple'
+                ))
+                ;
+            }
           },
           iframeAttributes: {
-            'allowtransparency': 'true'
+            'allowtransparency': 'true',
+            'frameborder': 0
           }
         });
 
+      var crossDomainIframeContentLoader = new window.validide_jbu
+        .IframeLoader(window, {
+          url: 'https://vadi-testing-stuff.firebaseapp.com/javascript-browser-utilities/simple-iframe-content.html',
+          parent: '#result-IframeLoader-cross-domain',
+          events: {
+            beforeCreate: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            },
+            created: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            },
+            beforeUpdate: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            },
+            updated: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            },
+            beforeDestroy: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            },
+            destroyed: function (e) {
+              eventHander(
+                e,
+                document.getElementById('result-IframeLoader-cross-domain')
+              );
+            }
+          },
+          iframeAttributes: {
+            'allowtransparency': 'true',
+            'frameborder': 0
+          }
+        });
     })();
   </script>
 </body>
