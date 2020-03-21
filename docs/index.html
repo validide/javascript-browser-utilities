@@ -10,6 +10,7 @@
     integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
     integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous" />
+  <link rel="stylesheet" href="./css/app.css" />
 </head>
 
 <body>
@@ -42,39 +43,87 @@
     <section>
       <hr />
       <h2>IFRAME MODULE</h2>
-      <article>
-        <h3>Simple</h3>
-        <p>Send a HTTP request using an IFRAME.</p>
-        <div class="container">
-          <div class="row">
-            <div class="col-md-6" data-code="js-IframeHttpRequest"></div>
-            <div class="col-md-6" id="result_IframeHttpRequest">
+      <section>
+        <h3>IframeHttpRequest</h3>
+        <article>
+          <h3>Simple</h3>
+          <p>Send a HTTP request using an IFRAME.</p>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Code</h4>
+                <div data-code="js-IframeHttpRequest"></div>
+              </div>
+              <div class="col-md-6">
+                <h4>Result</h4>
+                <div id="result-IframeHttpRequest"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </article>
-      <article>
-        <h3>Redirect without configuration</h3>
-        <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since `redirectTimeout` is 1s and the redirect delay is 1.5s we will wrongfully display the redirect page content.</p>
-        <div class="container">
-          <div class="row">
-            <div class="col-md-6" data-code="js-IframeHttpRequest-redirect-wrong"></div>
-            <div class="col-md-6" id="result_wrong_IframeHttpRequest">
+        </article>
+        <article>
+          <h3>Redirect without configuration</h3>
+          <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since
+            `redirectTimeout` is 1s and the redirect delay is 1.5s we will wrongfully display the redirect page content.
+          </p>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Code</h4>
+                <div data-code="js-IframeHttpRequest-redirect-wrong"></div>
+              </div>
+              <div class="col-md-6">
+                <h4>Result</h4>
+                <div id="result-wrong-IframeHttpRequest"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </article>
-      <article>
-        <h3>Redirect with configuration</h3>
-        <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since `redirectTimeout` is 2s and the redirect delay is 1.5s we will display the correct content.</p>
-        <div class="container">
-          <div class="row">
-            <div class="col-md-6" data-code="js-IframeHttpRequest-redirect-correct"></div>
-            <div class="col-md-6" id="result_correct_IframeHttpRequest">
+        </article>
+        <article>
+          <h3>Redirect with configuration</h3>
+          <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since
+            `redirectTimeout` is 2s and the redirect delay is 1.5s we will display the correct content.</p>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Code</h4>
+                <div data-code="js-IframeHttpRequest-redirect-correct"></div>
+              </div>
+              <div class="col-md-6">
+                <h4>Result</h4>
+                <div id="result-correct-IframeHttpRequest"></div>
+              </div>
             </div>
           </div>
-        </div>
-      </article>
+        </article>
+      </section>
+      <section>
+        <h3>IframeLoader</h3>
+        <article>
+          <h3>Simple</h3>
+          <p>Load content inside of an iframe.</p>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-6">
+                <h4>Code</h4>
+                <div data-code="js-IframeLoader-simple"></div>
+              </div>
+              <div class="col-md-6">
+                <div class="row">
+                  <div class="col-12 loader-absolute">
+                    <h4>Result</h4>
+                    <div id="result-IframeLoader-simple"></div>
+                  </div>
+                  <div class="col-12">
+                    <h4>Events</h4>
+                    <div id="console-IframeLoader-simple"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
     </section>
   </div>
 
@@ -97,7 +146,7 @@
     integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
   <script src="./dist/bundle/index.js"></script>
   <script src="./js/app.js"></script>
-   <script data-lang="js" id="js-IframeHttpRequest">
+  <script data-lang="js" id="js-IframeHttpRequest">
     (function () {
       var request = new window.validide_jbu.IframeHttpRequest(
         window,
@@ -110,10 +159,10 @@
         }
       );
       var container = window.document
-        .getElementById('result_IframeHttpRequest');
+        .getElementById('result-IframeHttpRequest');
       request.sendAsync().then(
         function (res) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           if (res.data) {
             window.app.appendAsCode(container, res.data, 'json');
           } else {
@@ -121,11 +170,11 @@
           }
         },
         function (err) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           window.app.appendAsCode(container, err.error.message);
         }
       );
-      window.app.addSpinner(container);
+      window.app.addLoader(container);
     })();
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-wrong">
@@ -144,13 +193,13 @@
         }
       );
       var container = window.document
-        .getElementById('result_wrong_IframeHttpRequest');
+        .getElementById('result-wrong-IframeHttpRequest');
       var prom = request.sendAsync();
       // fake the url to allow the redirect - for testing only
       request.url = 'http://foo.bar/';
       prom.then(
         function (res) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           if (res.data) {
             window.app.appendAsCode(container, res.data, 'html');
           } else {
@@ -158,11 +207,11 @@
           }
         },
         function (err) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           window.app.appendAsCode(container, err.error.message);
         }
       );
-      window.app.addSpinner(container);
+      window.app.addLoader(container);
     })();
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-correct">
@@ -181,13 +230,13 @@
         }
       );
       var container = window.document
-        .getElementById('result_correct_IframeHttpRequest');
+        .getElementById('result-correct-IframeHttpRequest');
       var prom = request.sendAsync();
       // fake the url to allow the redirect - for testing only
       request.url = 'http://foo.bar/';
       prom.then(
         function (res) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           if (res.data) {
             window.app.appendAsCode(container, res.data, 'json');
           } else {
@@ -195,14 +244,81 @@
           }
         },
         function (err) {
-          window.app.removeSpinner(container);
+          window.app.removeLoader(container);
           window.app.appendAsCode(container, err.error.message);
         }
       );
-      window.app.addSpinner(container);
+      window.app.addLoader(container);
     })();
   </script>
+  <script data-lang="js" id="js-IframeLoader-simple">
+    (function () {
+      var contentContainer = window.document
+        .getElementById('result-IframeLoader-simple');
+        var consoleContainer = window.document
+        .getElementById('console-IframeLoader-simple');
+      var events = [];
+      var eventHander = function (e) {
+        events.push(e);
 
+        switch(e.type) {
+          case 'beforeCreate': {
+            window.app.addLoader(contentContainer);
+            break;
+          }
+          case 'created': {
+            e.el.classList.add('iframe-block-content');
+            e.el.classList.add('iframe-pending-ready');
+            break;
+          }
+          case 'beforeUpdate': {
+            window.app.addLoader(contentContainer);
+            break;
+          }
+          case 'updated': {
+            e.el.classList.remove('iframe-pending-ready');
+            window.app.removeLoader(contentContainer);
+            break;
+          }
+          case 'beforeDestroy': {
+            alert('Component "' + e.el.querySelector('iframe').src + '" is about to destroy!');
+            break;
+          }
+          case 'destroyed': {
+            window.app.removeLoader(contentContainer);
+            alert('Component wad destroyed!');
+            break;
+          }
+
+          default:
+            break;
+        }
+
+        consoleContainer.innerHTML = '';
+        window.app.appendAsCode(
+          consoleContainer,
+          events.map(e => JSON.stringify(e)).join('\n'));
+      };
+
+      var iframeContentLoader = new window.validide_jbu
+        .IframeLoader(window, {
+          url: './simple-iframe-content.html',
+          parent: '#result-IframeLoader-simple',
+          events: {
+            beforeCreate: eventHander,
+            created: eventHander,
+            beforeUpdate: eventHander,
+            updated: eventHander,
+            beforeDestroy: eventHander,
+            destroyed: eventHander
+          },
+          iframeAttributes: {
+            'allowtransparency': 'true'
+          }
+        });
+
+    })();
+  </script>
 </body>
 
 </html>

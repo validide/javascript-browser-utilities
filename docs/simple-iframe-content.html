@@ -11,6 +11,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
     integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous" />
   <link rel="stylesheet" href="./css/app.css"/>
+  <style>
+    html,body { height: 100%; }
+  </style>
 </head>
 
 <body>
@@ -19,7 +22,19 @@
   </div>
 
   <div class="container">
-    <h1>JavaScript Browser Utilities</h1>
+    <pre><code id="message"></code></pre>
+    <div class="row">
+      <div class="col-md-6">
+        <a role="button" href="javascript:void(0)"
+          class="btn btn-block btn-outline-primary my-1"
+          id="action-busy">Set Busy for 5s</a>
+      </div>
+      <div class="col-md-6">
+        <a role="button" href="javascript:void(0)"
+        class="btn btn-block btn-outline-danger my-1"
+        id="action-close">Close</a>
+      </div>
+    </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
@@ -40,11 +55,32 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/json.min.js"
     integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
   <script src="./dist/bundle/index.js"></script>
-  <script src="./js/app.js"></script>
-  <script type="text/template" data-lang="html" id="html-unescaped-code">
-    <p> HTML HERE <span style="color: red;">AAA</span> </p>
-  </script>
 
+  <script>
+    (function(){
+      var origin = window.validide_jbu.getUrlOrigin(window.document, window.location.href);
+      var iframeContent = new window.validide_jbu.IframeContent(window, origin);
+      window.document.getElementById('message').textContent = 'This content is from: '
+        + '\n  - location: ' + window.location.href
+        + '\n  - origin: ' + origin;
+
+      window.document.getElementById('action-busy').addEventListener('click', function(e) {
+        iframeContent.signalBusyState(true);
+        setTimeout(function() {
+          iframeContent.signalBusyState(false);
+        }, 5000);
+      });
+
+      window.document.getElementById('action-close').addEventListener('click', function(e) {
+        iframeContent.dispose();
+      });
+
+      setTimeout(function() {
+        // Simulate some long running process.
+        iframeContent.signalBusyState(false);
+      }, 2000);
+    })();
+  </script>
 </body>
 
 </html>

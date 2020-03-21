@@ -70,11 +70,19 @@
     hljs.highlightBlock(code);
   }
 
-  function addSpinner(container) {
-    container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"><span class="sr-only">Loading...</span></div></div>';
+  function addLoader(container) {
+    if (container.querySelectorAll('.loader').length)
+      return; // We already have a loader;
+
+    var loader = window.document.createElement('div');
+    loader.className = 'loader';
+    loader.textContent = 'Loading...';
+    container.appendChild(loader);
   }
-  function removeSpinner(container) {
-    container.innerHTML = '';
+  function removeLoader(container) {
+    container.querySelectorAll('.loader').forEach(f => {
+      f.parentElement.removeChild(f);
+    });
   }
 
   function init() {
@@ -83,10 +91,10 @@
 
   window.app = {
     appendAsCode: appendAsCode,
-    addSpinner: addSpinner,
+    addLoader: addLoader,
     getQueryParms: getQueryParms,
     parseQueryString: parseQueryString,
-    removeSpinner: removeSpinner,
+    removeLoader: removeLoader,
     ready: ready,
     setQueryParms: setQueryParms,
     init: init
