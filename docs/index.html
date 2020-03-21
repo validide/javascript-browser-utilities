@@ -152,7 +152,7 @@
   <script src="./js/app.js"></script>
   <script data-lang="js" id="js-IframeHttpRequest">
     (function () {
-      var request = new window.validide_jbu.IframeHttpRequest(
+      var request = new validide_jbu.IframeHttpRequest(
         window,
         './data/random.json',
         null,
@@ -183,12 +183,12 @@
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-wrong">
     (function () {
-      var request = new window.validide_jbu.IframeHttpRequest(
+      var request = new validide_jbu.IframeHttpRequest(
         window,
         './redirect.html',
         {
           iterate: 5,
-          url: window.validide_jbu.getUrlFullPath(window.document, './data/random.json')
+          url: validide_jbu.getUrlFullPath(window.document, './data/random.json')
         },
         'GET',
         {
@@ -220,12 +220,12 @@
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-correct">
     (function () {
-      var request = new window.validide_jbu.IframeHttpRequest(
+      var request = new validide_jbu.IframeHttpRequest(
         window,
         './redirect.html',
         {
           iterate: 2,
-          url: window.validide_jbu.getUrlFullPath(window.document, './data/random.json')
+          url: validide_jbu.getUrlFullPath(window.document, './data/random.json')
         },
         'GET',
         {
@@ -302,7 +302,7 @@
           events.map(e => JSON.stringify(e, undefined, 2)).join('\n'));
       };
 
-      var iframeContentLoader = new window.validide_jbu
+      var iframeContentLoader = new validide_jbu
         .IframeLoader(window, {
           url: './simple-iframe-content.html',
           parent: '#result-IframeLoader-simple',
@@ -351,7 +351,7 @@
           }
         });
 
-      var crossDomainIframeContentLoader = new window.validide_jbu
+      var crossDomainIframeContentLoader = new validide_jbu
         .IframeLoader(window, {
           url: 'https://vadi-testing-stuff.firebaseapp.com/javascript-browser-utilities/simple-iframe-content.html',
           parent: '#result-IframeLoader-cross-domain',

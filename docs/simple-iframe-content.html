@@ -47,22 +47,24 @@
 
   <script>
     (function(){
-      var origin = window.validide_jbu.getUrlOrigin(window.document, window.location.href);
-      var parentOrigin = window.validide_jbu.getUrlOrigin(window.document, window.location.href);
-      var iframeContent = new window.validide_jbu.IframeContent(window, parentOrigin);
-      window.document.getElementById('message').textContent = 'This content is from: '
+      var origin = validide_jbu.getUrlOrigin(document, window.location.href);
+      var parentOrigin = window.location.hostname === 'localhost'
+        ? window.location.origin
+        : validide_jbu.getUrlOrigin(window.location.href);
+      var iframeContent = new validide_jbu.IframeContent(window, parentOrigin);
+      document.getElementById('message').textContent = 'This content is from: '
         + '\n  - location: ' + window.location.href
         + '\n  - origin: ' + origin
         + '\n  - parentOrigin: ' + parentOrigin;
 
-      window.document.getElementById('action-busy').addEventListener('click', function(e) {
+      document.getElementById('action-busy').addEventListener('click', function(e) {
         iframeContent.signalBusyState(true);
         setTimeout(function() {
           iframeContent.signalBusyState(false);
         }, 5000);
       });
 
-      window.document.getElementById('action-close').addEventListener('click', function(e) {
+      document.getElementById('action-close').addEventListener('click', function(e) {
         iframeContent.dispose();
       });
 
