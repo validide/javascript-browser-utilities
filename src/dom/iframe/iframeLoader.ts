@@ -176,12 +176,16 @@ export class IframeLoader extends BaseComponent {
       : undefined;
 
     if (handler) {
-      handler({
-        type: eventType,
-        el: this.rootElement,
-        parentEl: this.getParentElement(),
-        id: this.iframeId
-      });
+      try {
+        handler({
+          type: eventType,
+          el: this.rootElement,
+          parentEl: this.getParentElement(),
+          id: this.iframeId
+        });
+      } catch (error) {
+        console.error(`Calling the "${eventType}" handler failed.`, error);
+      }
     }
   }
 

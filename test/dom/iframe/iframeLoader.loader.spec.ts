@@ -101,6 +101,29 @@ export function test_iframeLoader_loader() {
       ).throws(Error, `Failed to find parent "${parent}".`);
     })
 
+    it('failing event handlers should not fail the operation', () => {
+      let errorMessage = '';
+      var originalConsoleError = console.error;
+      console.error = function(message?: any, ...optionalParams: any[]) {
+        errorMessage = message;
+      }
+
+      const loader = new IframeLoader(
+        _win, {
+          url: 'http://localhost:81/child',
+          parent: _win.document.body,
+          events: {
+            beforeDestroy: function(e) {
+              throw new Error('test');
+            }
+          }
+        }
+      );
+      expect(() => { loader.dispose(); }).not.throws();
+      expect(errorMessage).to.eq(`Calling the "${IframeLoaderEventType.BeforeDestroy}" handler failed.`);
+      console.error = originalConsoleError;
+    })
+
     it('calling dispose multiple times does not throw an error', () => {
       expect(
         () => {
