@@ -286,9 +286,17 @@
         redirectTimeout: 3 * 1000
     };
 
+    (function (IframeMessageState) {
+        IframeMessageState[IframeMessageState["Mounted"] = 0] = "Mounted";
+        IframeMessageState[IframeMessageState["BeforeUpdate"] = 1] = "BeforeUpdate";
+        IframeMessageState[IframeMessageState["Updated"] = 2] = "Updated";
+        IframeMessageState[IframeMessageState["Destroyed"] = 3] = "Destroyed";
+    })(exports.IframeMessageState || (exports.IframeMessageState = {}));
     (function (IframeLoaderEventType) {
         IframeLoaderEventType["BeforeCreate"] = "beforeCreate";
         IframeLoaderEventType["Created"] = "created";
+        IframeLoaderEventType["BeforeMount"] = "beforeMount";
+        IframeLoaderEventType["Mounted"] = "mounted";
         IframeLoaderEventType["BeforeUpdate"] = "beforeUpdate";
         IframeLoaderEventType["Updated"] = "updated";
         IframeLoaderEventType["BeforeDestroy"] = "beforeDestroy";
@@ -314,6 +322,8 @@
             this.disposed = false;
             this.onMessageRecieved = this.windowMessageHandler.bind(this);
             window.addEventListener('message', this.onMessageRecieved);
+            this.onIframeLoaded = this.iframeLoadedHandler.bind(this);
+            this.iframeLoaded = false;
             this.init();
         }
         /**
@@ -324,6 +334,10 @@
                 return;
             this.disposed = true;
             this.triggerEvent(exports.IframeLoaderEventType.BeforeDestroy);
+            if (this.onIframeLoaded) {
+                this.getIframe().removeEventListener('load', this.onIframeLoaded);
+            }
+            this.iframeLoaded = false;
             this.rootElement.parentElement.removeChild(this.rootElement);
             this.rootElement = null;
             this.getWindow().removeEventListener('message', this.onMessageRecieved);
@@ -335,10 +349,10 @@
         init() {
             this.triggerEvent(exports.IframeLoaderEventType.BeforeCreate);
             this.createRootElement();
-            this.cerateIframe();
+            this.createIframe();
             this.triggerEvent(exports.IframeLoaderEventType.Created);
         }
-        cerateIframe() {
+        createIframe() {
             if (this.getIframe())
                 return;
             const iframe = this.getDocument().createElement('iframe');
@@ -350,6 +364,7 @@
                     iframe.setAttribute(key, opt.iframeAttributes[key]);
                 }
             }
+            iframe.addEventListener('load', this.onIframeLoaded);
             iframe.setAttribute('src', opt.url);
             this.iframeId = generateUniqueId(this.getDocument(), 'ildr-');
             this.rootElement.appendChild(iframe);
@@ -391,12 +406,20 @@
                     });
                 }
                 catch (error) {
-                    console.error(`Calling the "${eventType}" handler failed.`, error);
+                    if (console && typeof console.error === 'function') {
+                        console.error(`Calling the "${eventType}" handler failed.`, error);
+                    }
                 }
             }
         }
         getIframe() {
             return this.rootElement.querySelector('iframe');
+        }
+        iframeLoadedHandler(event) {
+            if (!this.iframeLoaded) {
+                this.triggerEvent(exports.IframeLoaderEventType.BeforeMount);
+            }
+            this.iframeLoaded = true;
         }
         windowMessageHandler(event) {
             if (event.origin !== this.getIframeOrigin())
@@ -413,11 +436,19 @@
             }
             if (!messageData.id || messageData.id !== this.iframeId)
                 return;
-            if (messageData.destroyed) {
-                this.dispose();
-            }
-            else {
-                this.triggerEvent(messageData.busy ? exports.IframeLoaderEventType.BeforeUpdate : exports.IframeLoaderEventType.Updated);
+            switch (messageData.state) {
+                case exports.IframeMessageState.Mounted:
+                    this.triggerEvent(exports.IframeLoaderEventType.Mounted);
+                    break;
+                case exports.IframeMessageState.BeforeUpdate:
+                    this.triggerEvent(exports.IframeLoaderEventType.BeforeUpdate);
+                    break;
+                case exports.IframeMessageState.Updated:
+                    this.triggerEvent(exports.IframeLoaderEventType.Updated);
+                    break;
+                case exports.IframeMessageState.Destroyed:
+                    this.dispose();
+                    break;
             }
         }
         getIframeOrigin() {
@@ -428,14 +459,15 @@
         }
         shouldShakeHands(message) {
             // Handshake did not take place
-            if (!message.id)
+            if (!message.id && message.state === exports.IframeMessageState.Mounted)
                 return true;
             return false;
         }
         shakeHands(requestMessage) {
             const hash = getHashCode(this.iframeId).toString(10);
             const responseMessage = {
-                id: ''
+                id: '',
+                state: exports.IframeMessageState.Mounted
             };
             // We got a message back so if the data matches the hash we sent send the id
             if (requestMessage.data && requestMessage.data === hash) {
@@ -479,7 +511,12 @@
          * @param busy Is the component busy?
          */
         signalBusyState(busy) {
-            this.sendMessage({ id: this.iframeId, busy: busy });
+            this.sendMessage({
+                id: this.iframeId,
+                state: busy
+                    ? exports.IframeMessageState.BeforeUpdate
+                    : exports.IframeMessageState.Updated
+            });
         }
         /**
          * Dispose the component
@@ -493,13 +530,12 @@
                 this.getWindow().removeEventListener('message', this.onMessageRecieved);
                 this.onMessageRecieved = null;
             }
-            this.sendMessage({ id: '', destroyed: true });
+            this.sendMessage({ id: '', state: exports.IframeMessageState.Destroyed });
             super.dispose();
         }
         init() {
             // Bypass the queue and initiate the handshake.
-            this.sendMessage({ id: this.iframeId }, true);
-            this.signalBusyState(true);
+            this.sendMessage({ id: this.iframeId, state: exports.IframeMessageState.Mounted }, true);
         }
         windowMessageHandler(event) {
             if (event.origin !== this.parentOrigin)
@@ -516,15 +552,17 @@
             }
         }
         handShake(messageData) {
-            if (!messageData.id) {
-                // Phase 1 of the handshake - we got the hash so send it back.
-                this.sendMessage({ id: this.iframeId, busy: true, data: messageData.data }, true);
-            }
-            else {
+            if (messageData.id) {
                 // Phase 2 of the handshake - we got the id.
                 this.iframeId = messageData.id;
+                // Send it again to notify parent.
+                this.sendMessage({ id: this.iframeId, state: exports.IframeMessageState.Mounted });
                 // Send the previously queued messages.
                 this.flushMessages();
+            }
+            else {
+                // Phase 1 of the handshake - we got the hash so send it back.
+                this.sendMessage({ id: this.iframeId, state: exports.IframeMessageState.Mounted, data: messageData.data }, true);
             }
         }
         sendMessage(message, bypassQueue = false) {

@@ -2,13 +2,22 @@ import { BaseComponent } from "../../contracts/index";
 import { generateUniqueId, getUrlOrigin } from "../document/index";
 import { getHashCode } from "../../infrastructure/index";
 
-interface IframeMessage {
+export enum IframeMessageState {
+  Mounted = 0,
+  BeforeUpdate = 1,
+  Updated = 2,
+  Destroyed = 3
+}
+/**
+ * Messages set between the parent/child iframe compoents
+ */
+export interface IframeMessage {
   id: string;
-  busy?: boolean
-  destroyed?: boolean
-  data?: string
+  state: IframeMessageState;
+  data?: string;
 }
 type MessageEventHandlerFunctionType = (e: MessageEvent) => void;
+type GenericEventHandlerFunctionType = (e: Event) => void;
 
 /**
  * IframeLoader event types.
@@ -17,6 +26,8 @@ type MessageEventHandlerFunctionType = (e: MessageEvent) => void;
 export enum IframeLoaderEventType {
   BeforeCreate = 'beforeCreate',
   Created = 'created',
+  BeforeMount = 'beforeMount',
+  Mounted = 'mounted',
   BeforeUpdate = 'beforeUpdate',
   Updated = 'updated',
   BeforeDestroy = 'beforeDestroy',
@@ -45,6 +56,8 @@ export type EventHandlerFunctionType = (e: IframeLoaderEvent) => void;
 export interface IframeLoaderEvents {
   [IframeLoaderEventType.BeforeCreate]?: EventHandlerFunctionType;
   [IframeLoaderEventType.Created]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.BeforeMount]?: EventHandlerFunctionType;
+  [IframeLoaderEventType.Mounted]?: EventHandlerFunctionType;
   [IframeLoaderEventType.BeforeUpdate]?: EventHandlerFunctionType;
   [IframeLoaderEventType.Updated]?: EventHandlerFunctionType;
   [IframeLoaderEventType.BeforeDestroy]?: EventHandlerFunctionType;
@@ -70,6 +83,8 @@ export class IframeLoader extends BaseComponent {
   private rootElement: HTMLDivElement | null;
   private iframeId: string;
   private onMessageRecieved: null | MessageEventHandlerFunctionType;
+  private onIframeLoaded: null | GenericEventHandlerFunctionType;
+  private iframeLoaded: boolean;
   private disposed: boolean;
 
   /**
@@ -88,6 +103,8 @@ export class IframeLoader extends BaseComponent {
     this.disposed = false;
     this.onMessageRecieved = this.windowMessageHandler.bind(this);
     window.addEventListener('message', this.onMessageRecieved);
+    this.onIframeLoaded = this.iframeLoadedHandler.bind(this);
+    this.iframeLoaded = false;
     this.init();
   }
 
@@ -101,6 +118,10 @@ export class IframeLoader extends BaseComponent {
     this.disposed = true;
     this.triggerEvent(IframeLoaderEventType.BeforeDestroy);
 
+    if (this.onIframeLoaded) {
+      (<HTMLIFrameElement>this.getIframe()).removeEventListener('load', this.onIframeLoaded);
+    }
+    this,this.iframeLoaded = false;
     (<HTMLElement>(<HTMLDivElement>this.rootElement).parentElement).removeChild(<HTMLDivElement>this.rootElement);
     this.rootElement = null;
 
@@ -116,12 +137,12 @@ export class IframeLoader extends BaseComponent {
     this.triggerEvent(IframeLoaderEventType.BeforeCreate);
 
     this.createRootElement();
-    this.cerateIframe();
+    this.createIframe();
 
     this.triggerEvent(IframeLoaderEventType.Created);
   }
 
-  private cerateIframe(): void {
+  private createIframe(): void {
     if (this.getIframe())
       return;
 
@@ -135,6 +156,7 @@ export class IframeLoader extends BaseComponent {
       }
     }
 
+    iframe.addEventListener('load', <GenericEventHandlerFunctionType>this.onIframeLoaded);
     iframe.setAttribute('src', opt.url);
     this.iframeId = generateUniqueId(this.getDocument(), 'ildr-');
     (<HTMLDivElement>this.rootElement).appendChild(iframe);
@@ -184,13 +206,22 @@ export class IframeLoader extends BaseComponent {
           id: this.iframeId
         });
       } catch (error) {
-        console.error(`Calling the "${eventType}" handler failed.`, error);
+        if (console && typeof console.error === 'function') {
+          console.error(`Calling the "${eventType}" handler failed.`, error);
+        }
       }
     }
   }
 
   private getIframe(): HTMLIFrameElement | null {
     return (<HTMLDivElement>this.rootElement).querySelector('iframe');
+  }
+
+  private iframeLoadedHandler(event: Event): void {
+    if (!this.iframeLoaded) {
+      this.triggerEvent(IframeLoaderEventType.BeforeMount);
+    }
+    this.iframeLoaded = true;
   }
 
   private windowMessageHandler(event: MessageEvent): void {
@@ -213,10 +244,21 @@ export class IframeLoader extends BaseComponent {
     if (!messageData.id || messageData.id !== this.iframeId)
       return;
 
-    if (messageData.destroyed) {
-      this.dispose();
-    } else {
-      this.triggerEvent(messageData.busy ? IframeLoaderEventType.BeforeUpdate : IframeLoaderEventType.Updated);
+    switch (messageData.state) {
+      case IframeMessageState.Mounted:
+        this.triggerEvent(IframeLoaderEventType.Mounted);
+        break;
+      case IframeMessageState.BeforeUpdate:
+        this.triggerEvent(IframeLoaderEventType.BeforeUpdate);
+        break;
+      case IframeMessageState.Updated:
+        this.triggerEvent(IframeLoaderEventType.Updated);
+        break;
+      case IframeMessageState.Destroyed:
+        this.dispose();
+        break;
+      default:
+        break;
     }
   }
 
@@ -230,7 +272,7 @@ export class IframeLoader extends BaseComponent {
 
   private shouldShakeHands(message: IframeMessage): boolean {
     // Handshake did not take place
-    if (!message.id)
+    if (!message.id && message.state === IframeMessageState.Mounted)
       return true;
 
     return false;
@@ -239,7 +281,8 @@ export class IframeLoader extends BaseComponent {
   private shakeHands(requestMessage: IframeMessage): void {
     const hash = getHashCode(this.iframeId).toString(10);
     const responseMessage: IframeMessage = {
-      id: ''
+      id: '',
+      state: IframeMessageState.Mounted
     };
 
     // We got a message back so if the data matches the hash we sent send the id
@@ -294,7 +337,12 @@ export class IframeContent extends BaseComponent {
    * @param busy Is the component busy?
    */
   public signalBusyState(busy: boolean): void {
-    this.sendMessage({ id: this.iframeId, busy: busy });
+    this.sendMessage({
+      id: this.iframeId,
+      state: busy
+        ? IframeMessageState.BeforeUpdate
+        : IframeMessageState.Updated
+    });
   }
 
   /**
@@ -312,14 +360,13 @@ export class IframeContent extends BaseComponent {
       this.onMessageRecieved = null;
     }
 
-    this.sendMessage({ id: '', destroyed: true });
+    this.sendMessage({ id: '', state: IframeMessageState.Destroyed });
     super.dispose();
   }
 
   private init(): void {
     // Bypass the queue and initiate the handshake.
-    this.sendMessage({ id: this.iframeId }, true);
-    this.signalBusyState(true);
+    this.sendMessage({ id: this.iframeId, state: IframeMessageState.Mounted }, true);
   }
 
   private windowMessageHandler(event: MessageEvent): void {
@@ -341,16 +388,19 @@ export class IframeContent extends BaseComponent {
   }
 
   private handShake(messageData: IframeMessage) {
-    if (!messageData.id) {
-      // Phase 1 of the handshake - we got the hash so send it back.
-      this.sendMessage({ id: this.iframeId, busy: true, data: messageData.data }, true);
-    }
-    else {
+    if (messageData.id) {
       // Phase 2 of the handshake - we got the id.
       this.iframeId = messageData.id;
 
+      // Send it again to notify parent.
+      this.sendMessage({ id: this.iframeId, state: IframeMessageState.Mounted });
+
       // Send the previously queued messages.
       this.flushMessages();
+    }
+    else {
+      // Phase 1 of the handshake - we got the hash so send it back.
+      this.sendMessage({ id: this.iframeId, state: IframeMessageState.Mounted, data: messageData.data }, true);
     }
   }
 

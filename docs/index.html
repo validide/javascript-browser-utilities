@@ -163,6 +163,11 @@
     integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
   <script src="./lib/bundle/index.js"></script>
   <script src="./js/app.js"></script>
+  <script>
+    (function () {
+      //window.addEventListener('message', function (e) { console.log(e); });
+    })();
+  </script>
   <script data-lang="js" id="js-IframeHttpRequest">
     (function () {
       var request = new validide_jbu.IframeHttpRequest(
@@ -270,8 +275,7 @@
   </script>
   <script data-lang="js" id="js-IframeLoader-simple">
     (function () {
-      var consoleContainer = window.document
-        .getElementById('console-IframeLoader-simple');
+      var consoleContainer = window.document.getElementById('console-IframeLoader-simple');
       var events = [];
       var eventHander = function (e, contentContainer) {
         events.push(e);
@@ -284,6 +288,12 @@
           case 'created': {
             e.el.classList.add('iframe-block-content');
             e.el.classList.add('iframe-pending-ready');
+            break;
+          }
+          case 'beforeMount': {
+            break;
+          }
+          case 'mounted': {
             break;
           }
           case 'beforeUpdate': {
@@ -315,47 +325,35 @@
           events.map(e => JSON.stringify(e, undefined, 2)).join('\n'));
       };
 
-      var iframeContentLoader = new validide_jbu
-        .IframeLoader(window, {
-          url: './simple-iframe-content.html',
-          parent: '#result-IframeLoader-simple',
+      function createIframeLoader(url, parent) {
+        var parentEl = document.getElementById(parent);
+        return new validide_jbu.IframeLoader(window, {
+          url: url,
+          parent: parentEl,
           events: {
             beforeCreate: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple')
-              );
+              eventHander(e, parentEl);
             },
             created: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple')
-              );
+              eventHander(e, parentEl);
+            },
+            beforeMount: function (e) {
+              eventHander(e, parentEl);
+            },
+            mounted: function (e) {
+              eventHander(e, parentEl);
             },
             beforeUpdate: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple')
-              );
+              eventHander(e, parentEl);
             },
             updated: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple')
-              );
+              eventHander(e, parentEl);
             },
             beforeDestroy: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple')
-              );
+              eventHander(e, parentEl);
             },
             destroyed: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-simple'
-                ))
-                ;
+              eventHander(e, parentEl);
             }
           },
           iframeAttributes: {
@@ -363,54 +361,17 @@
             'frameborder': 0
           }
         });
+      };
 
-      var crossDomainIframeContentLoader = new validide_jbu
-        .IframeLoader(window, {
-          url: 'https://vadi-testing-stuff.firebaseapp.com/javascript-browser-utilities/simple-iframe-content.html',
-          parent: '#result-IframeLoader-cross-domain',
-          events: {
-            beforeCreate: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            },
-            created: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            },
-            beforeUpdate: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            },
-            updated: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            },
-            beforeDestroy: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            },
-            destroyed: function (e) {
-              eventHander(
-                e,
-                document.getElementById('result-IframeLoader-cross-domain')
-              );
-            }
-          },
-          iframeAttributes: {
-            'allowtransparency': 'true',
-            'frameborder': 0
-          }
-        });
+      var iframeContentLoader = createIframeLoader(
+        './simple-iframe-content.html',
+        'result-IframeLoader-simple'
+      );
+
+      var crossDomainIframeContentLoader = createIframeLoader(
+        'https://vadi-testing-stuff.firebaseapp.com/javascript-browser-utilities/simple-iframe-content.html',
+        'result-IframeLoader-cross-domain'
+      );
     })();
   </script>
   <script data-lang="js" id="js-IframeLoader-modal">
@@ -431,6 +392,8 @@
             events: {
               beforeCreate: eventHander,
               created: eventHander,
+              beforeMount: eventHander,
+              mounted: eventHander,
               beforeUpdate: eventHander,
               updated: eventHander,
               beforeDestroy: eventHander,
@@ -452,6 +415,12 @@
           }
           case 'created': {
             e.el.classList.add('d-none');
+            break;
+          }
+          case 'beforeMount': {
+            break;
+          }
+          case 'mounted': {
             break;
           }
           case 'beforeUpdate': {
