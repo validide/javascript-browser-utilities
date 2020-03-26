@@ -364,7 +364,7 @@
       };
 
       var iframeContentLoader = createIframeLoader(
-        './simple-iframe-content.html',
+        './redirect.html?iterate=3&url=' + encodeURIComponent(validide_jbu.getUrlFullPath(window.document, './simple-iframe-content.html')),
         'result-IframeLoader-simple'
       );
 
@@ -387,7 +387,11 @@
 
         contentLoader = new validide_jbu
           .IframeLoader(window, {
-            url: './modal-iframe-content.html',
+            url: './redirect.html?iterate=5&url='
+              + encodeURIComponent(validide_jbu.getUrlFullPath(
+                window.document,
+                './modal-iframe-content.html'
+              )),
             parent: 'body',
             events: {
               beforeCreate: eventHander,
