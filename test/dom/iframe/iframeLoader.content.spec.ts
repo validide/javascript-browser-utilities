@@ -2,7 +2,7 @@ import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 import { IframeContent, IframeMessage, IframeMessageState } from '../../../src/dom/iframe/iframeLoader';
-import { falsies } from '../../utils';
+import { falsies, getDelayPromise } from '../../utils';
 
 export function test_iframeLoader_content() {
   describe('IframeContent - Standalone', () => {
@@ -130,7 +130,7 @@ export function test_iframeLoader_content() {
       _parent.postMessage('end-the-unit-test', 'http://localhost:81');
     });
 
-    it('should have all messages after handshake',done => {
+    it('should have all messages after handshake', async () => {
       const messages = new Array<IframeMessage>();
       const content = new IframeContent(_win, 'http://localhost:81');
       const idValue = 'id-value';
@@ -141,80 +141,6 @@ export function test_iframeLoader_content() {
       }
 
       _parent.addEventListener('message',e => {
-        if (e.data === 'end-the-unit-test') {
-          try {
-            // console.log(JSON.stringify(messages, undefined, 2))
-            // expect(messages.length).to.be.eq(2);
-            let idx = 0;
-            // Handshake init event
-            expect(messages[idx].id).to.be.eq('');
-
-            falsies.forEach(f => {
-              idx++;
-              expect(messages[idx].id).to.be.eq('');
-              expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
-              expect(messages[idx].data).to.be.eq(f);
-            });
-
-            idx++;
-            // Handshake reply event
-            expect(messages[idx].id).to.be.eq('');
-            expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
-            expect(messages[idx].data).to.be.eq('id-hash');
-
-            idx++;
-            // Signal MOUNTED from INIT
-            expect(messages[idx].id).to.be.eq(idValue);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
-            expect(messages[idx].data).to.be.eq(undefined);
-
-            idx++;
-            // Busy from EVT_PRE_HS
-            expect(messages[idx].id).to.be.eq(idValue);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
-            expect(messages[idx].data).to.be.eq(undefined);
-
-            idx++;
-            // Signal busy from call
-            expect(messages[idx].id).to.be.eq(idValue);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
-            expect(messages[idx].data).to.be.eq(undefined);
-
-            idx++;
-            // Signal not busy from call
-            expect(messages[idx].id).to.be.eq(idValue);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.Updated);
-            expect(messages[idx].data).to.be.eq(undefined);
-
-            idx++;
-            // Signal busy from dispose
-            expect(messages[idx].id).to.be.eq(idValue, `ID: ${idx}`);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
-            expect(messages[idx].data).to.be.eq(undefined, `DATA: ${idx}`);
-
-            idx++;
-            // Signal dispose
-            expect(messages[idx].id).to.be.eq(idValue, `ID: ${idx}`);
-            expect(messages[idx].state).to.be.eq(IframeMessageState.Destroyed);
-            expect(messages[idx].data).to.be.eq(undefined, `DATA: ${idx}`);
-
-          } catch (err) {
-            messages.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
-            throw err;
-          }
-          finally {
-            done();
-          }
-
-          return;
-        }
-
-        if (e.data === 'pre-end-the-unit-test') {
-          content.dispose();
-          _parent.postMessage('end-the-unit-test', 'http://localhost:81');
-          return;
-        }
-
         messages.push(e.data);
       });
 
@@ -240,7 +166,73 @@ export function test_iframeLoader_content() {
 
       content.signalBusyState(true);
       content.signalBusyState(false);
-      _parent.postMessage('pre-end-the-unit-test', 'http://localhost:81');
+
+      await getDelayPromise(3);
+
+      content.dispose();
+
+      await getDelayPromise(3);
+
+      try {
+        // console.log(JSON.stringify(messages, undefined, 2))
+        // expect(messages.length).to.be.eq(2);
+        let idx = 0;
+        // Handshake init event
+        expect(messages[idx].id).to.be.eq('');
+
+        falsies.forEach(f => {
+          idx++;
+          expect(messages[idx].id).to.be.eq('');
+          expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
+          expect(messages[idx].data).to.be.eq(f);
+        });
+
+        idx++;
+        // Handshake reply event
+        expect(messages[idx].id).to.be.eq('');
+        expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
+        expect(messages[idx].data).to.be.eq('id-hash');
+
+        idx++;
+        // Signal MOUNTED from INIT
+        expect(messages[idx].id).to.be.eq(idValue);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.Mounted);
+        expect(messages[idx].data).to.be.eq(undefined);
+
+        idx++;
+        // Busy from EVT_PRE_HS
+        expect(messages[idx].id).to.be.eq(idValue);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
+        expect(messages[idx].data).to.be.eq(undefined);
+
+        idx++;
+        // Signal busy from call
+        expect(messages[idx].id).to.be.eq(idValue);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
+        expect(messages[idx].data).to.be.eq(undefined);
+
+        idx++;
+        // Signal not busy from call
+        expect(messages[idx].id).to.be.eq(idValue);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.Updated);
+        expect(messages[idx].data).to.be.eq(undefined);
+
+        idx++;
+        // Signal busy from dispose
+        expect(messages[idx].id).to.be.eq(idValue, `ID: ${idx}`);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
+        expect(messages[idx].data).to.be.eq(undefined, `DATA: ${idx}`);
+
+        idx++;
+        // Signal dispose
+        expect(messages[idx].id).to.be.eq(idValue, `ID: ${idx}`);
+        expect(messages[idx].state).to.be.eq(IframeMessageState.Destroyed);
+        expect(messages[idx].data).to.be.eq(undefined, `DATA: ${idx}`);
+
+      } catch (err) {
+        messages.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
+        throw err;
+      }
     });
   });
 }

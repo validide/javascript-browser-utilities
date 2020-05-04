@@ -3,7 +3,7 @@ import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 import { IframeLoaderOptions, IframeLoaderEvent, IframeLoaderEvents, IframeLoader, IframeContent, IframeLoaderEventType, IframeMessageState, IframeMessage } from '../../../src/dom/iframe';
-import { falsies } from '../../utils';
+import { falsies, getDelayPromise } from '../../utils';
 import { getHashCode } from '../../../src/infrastructure';
 
 
@@ -178,7 +178,7 @@ export function test_iframeLoader_loader() {
       expect(_win.document.body.children.length).to.eq(1);
     });
 
-    it('message handling',done => {
+    it('message handling', async () => {
       const winMessages = new Array<IframeMessage>();
       const idValue = (_testLoader as any).iframeId;
       const origin = 'http://localhost:81';
@@ -194,22 +194,6 @@ export function test_iframeLoader_loader() {
 
 
       _win.addEventListener('message',e => {
-        if (e.data === 'end-the-unit-test') {
-          try{
-            assertMessageQueue();
-            assertEventsQueue();
-          }
-          finally {
-            done();
-          }
-          return;
-        }
-
-        if (e.data === 'pre-end-the-unit-test') {
-          preTestEnd();
-          return;
-        }
-
         winMessages.push(e.data);
       });
 
@@ -274,6 +258,7 @@ export function test_iframeLoader_loader() {
       // EVT2
       postMessage({ id: '', state: IframeMessageState.Mounted }, origin);
 
+      await getDelayPromise(3);
 
       function afterHandshake(id: string) {
 
@@ -293,190 +278,182 @@ export function test_iframeLoader_loader() {
         // EVT8
         postMessage({ id: id, state: IframeMessageState.Destroyed }, origin);
       }
+      await getDelayPromise(3);
 
-      setTimeout(() => {
-        _win.postMessage('pre-end-the-unit-test', origin);
-      }, 1);
+      _testLoader.dispose();
 
-      function preTestEnd() {
-        _testLoader.dispose();
-        _win.postMessage('end-the-unit-test', origin);
+      await getDelayPromise(3);
+
+      try {
+        expect(contentIframeId).to.eq(idValue);
+        let idx = -1;
+
+        // EVT BEFORE LOAD
+        idx++;
+        expect(winMessages[idx]).to.be.eq(undefined, 'EVT_BEFORE_LOAD');
+
+        falsies.forEach(f => {
+          // ignore due to "mising" data
+          idx++;
+          expect(winMessages[idx]).to.be.eq(f, `FALSIE_${f}`);
+        });
+
+        // ignore test - EVT0
+        idx++;
+        expect(winMessages[idx].id).to.be.eq('123456', `ID_EVT0(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(undefined, `STATE_EVT0(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT0(${idx})`);
+
+        // ignore test - EVT1
+        idx++;
+        expect(winMessages[idx].id).to.be.eq('123456', `ID_EVT1(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT1(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT1(${idx})`);
+
+        // Handshake init event - EVT2
+        idx++;
+        expect(winMessages[idx].id).to.be.eq('', `ID_EVT2(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT2(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT2(${idx})`);
+
+        // Handshake init event - EVT3
+        idx++;
+        expect(winMessages[idx].id).to.be.eq('', `ID_EVT3(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT3(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(getHashCode(idValue).toString(10), `DATA_EVT3(${idx})`);
+
+        // Handshake Mounted
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT3(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT3(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT3(${idx})`);
+
+        // ignore test - EVT4
+        idx++;
+        expect(winMessages[idx].id).to.be.eq('', `ID_EVT4(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT4(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT4(${idx})`);
+
+        // ignore test - EVT5
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT5(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Updated, `STATE_EVT5(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT5(${idx})`);
+
+        // set busy - EVT6
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT6(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate, `STATE_EVT6(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT6(${idx})`);
+
+        // set not busy - EVT7
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT7(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Updated, `STATE_EVT7(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT7(${idx})`);
+
+        // EVT_MOUNTED
+
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT_DEFAULT(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT_DEFAULT(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT_DEFAULT(${idx})`);
+
+        // EVT_DEFAULT
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT_DEFAULT(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(-1 as IframeMessageState, `STATE_EVT_DEFAULT(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT_DEFAULT(${idx})`);
+
+        // destroy - EVT8
+        idx++;
+        expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT8(${idx})`);
+        expect(winMessages[idx].state).to.be.eq(IframeMessageState.Destroyed, `STATE_EVT8(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT8(${idx})`);
+
+        expect(winMessages.length).to.be.eq(idx + 1);
+      } catch (err) {
+        // console.log(JSON.stringify(winMessages, undefined, 2))
+        winMessages.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
+
+        throw err;
       }
 
-      function assertMessageQueue() {
-        try {
-          expect(contentIframeId).to.eq(idValue);
-          let idx = -1;
+      try {
+        let idx = -1;
 
-          // EVT BEFORE LOAD
-          idx++;
-          expect(winMessages[idx]).to.be.eq(undefined, 'EVT_BEFORE_LOAD');
+        // CTOR - beforeCreate
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeCreate, `TYPE_CTOR_b(${idx})`);
+        expect(_events[idx].el).to.eq(null, `EL_CTOR_b(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_b(${idx})`);
 
-          falsies.forEach(f => {
-            // ignore due to "mising" data
-            idx++;
-            expect(winMessages[idx]).to.be.eq(f, `FALSIE_${f}`);
-          });
+        // CTOR - created
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Created, `TYPE_CTOR_c(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
 
-          // ignore test - EVT0
-          idx++;
-          expect(winMessages[idx].id).to.be.eq('123456', `ID_EVT0(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(undefined, `STATE_EVT0(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT0(${idx})`);
-
-          // ignore test - EVT1
-          idx++;
-          expect(winMessages[idx].id).to.be.eq('123456', `ID_EVT1(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT1(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT1(${idx})`);
-
-          // Handshake init event - EVT2
-          idx++;
-          expect(winMessages[idx].id).to.be.eq('', `ID_EVT2(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT2(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT2(${idx})`);
-
-          // Handshake init event - EVT3
-          idx++;
-          expect(winMessages[idx].id).to.be.eq('', `ID_EVT3(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT3(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(getHashCode(idValue).toString(10), `DATA_EVT3(${idx})`);
-
-          // Handshake Mounted
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT3(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT3(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT3(${idx})`);
-
-          // ignore test - EVT4
-          idx++;
-          expect(winMessages[idx].id).to.be.eq('', `ID_EVT4(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT4(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT4(${idx})`);
-
-          // ignore test - EVT5
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT5(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Updated, `STATE_EVT5(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT5(${idx})`);
-
-          // set busy - EVT6
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT6(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate, `STATE_EVT6(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT6(${idx})`);
-
-          // set not busy - EVT7
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT7(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Updated, `STATE_EVT7(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT7(${idx})`);
-
-          // EVT_MOUNTED
-
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT_DEFAULT(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT_DEFAULT(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT_DEFAULT(${idx})`);
-
-          // EVT_DEFAULT
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT_DEFAULT(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(-1 as IframeMessageState, `STATE_EVT_DEFAULT(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT_DEFAULT(${idx})`);
-
-          // destroy - EVT8
-          idx++;
-          expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT8(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(IframeMessageState.Destroyed, `STATE_EVT8(${idx})`);
-          expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT8(${idx})`);
-
-          expect(winMessages.length).to.be.eq(idx + 1);
-        } catch (err) {
-          // console.log(JSON.stringify(winMessages, undefined, 2))
-          winMessages.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
-
-          throw err;
-        }
-      }
-
-      function assertEventsQueue() {
-        try {
-          let idx = -1;
-
-          // CTOR - beforeCreate
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeCreate, `TYPE_CTOR_b(${idx})`);
-          expect(_events[idx].el).to.eq(null, `EL_CTOR_b(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_b(${idx})`);
-
-          // CTOR - created
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Created, `TYPE_CTOR_c(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
-
-          // CTOR - before mount
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeMount, `TYPE_CTOR_c(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
+        // CTOR - before mount
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeMount, `TYPE_CTOR_c(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
 
 
-          // CTOR - mounted
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Mounted, `TYPE_CTOR_c(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
+        // CTOR - mounted
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Mounted, `TYPE_CTOR_c(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_CTOR_c(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_CTOR_c(${idx})`);
 
 
-          // EVT5 - not busy
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Updated, `TYPE_EVT5(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_EVT5(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT5(${idx})`);
+        // EVT5 - not busy
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Updated, `TYPE_EVT5(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_EVT5(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT5(${idx})`);
 
-          // EVT6 - busy
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeUpdate, `TYPE_EVT6(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_EVT6(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT6(${idx})`);
+        // EVT6 - busy
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeUpdate, `TYPE_EVT6(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_EVT6(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT6(${idx})`);
 
-          // EVT7 - not busy
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Updated, `TYPE_EVT7(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_EVT7(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT7(${idx})`);
+        // EVT7 - not busy
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Updated, `TYPE_EVT7(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_EVT7(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT7(${idx})`);
 
-          // EVT_MOUNTED
+        // EVT_MOUNTED
 
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Mounted, `TYPE_EVT_MOUNTED(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_EVT_MOUNTED(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT_MOUNTED(${idx})`);
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Mounted, `TYPE_EVT_MOUNTED(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_EVT_MOUNTED(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT_MOUNTED(${idx})`);
 
-          // EVT_DEFAULT
-          // <IframeMessageState>-1 -> this shall be ignored
+        // EVT_DEFAULT
+        // <IframeMessageState>-1 -> this shall be ignored
 
 
-          // EVT8.1 - beforeDestroy
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeDestroy, `TYPE_EVT8.1(${idx})`);
-          expect(_events[idx].el).to.not.eq(null, `EL_EVT8.1(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT8.1(${idx})`);
+        // EVT8.1 - beforeDestroy
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.BeforeDestroy, `TYPE_EVT8.1(${idx})`);
+        expect(_events[idx].el).to.not.eq(null, `EL_EVT8.1(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT8.1(${idx})`);
 
-          // EVT8.2 - destroyed
-          idx++;
-          expect(_events[idx].type).to.eq(IframeLoaderEventType.Destroyed, `TYPE_EVT8.2(${idx})`);
-          expect(_events[idx].el).to.eq(null, `EL_EVT8.2(${idx})`);
-          expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT8.2(${idx})`);
+        // EVT8.2 - destroyed
+        idx++;
+        expect(_events[idx].type).to.eq(IframeLoaderEventType.Destroyed, `TYPE_EVT8.2(${idx})`);
+        expect(_events[idx].el).to.eq(null, `EL_EVT8.2(${idx})`);
+        expect(_events[idx].parentEl).not.to.eq(null, `EL_EVT8.2(${idx})`);
 
-          expect(_events.length).to.be.eq(idx + 1);
-        } catch (err) {
-          _events.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
+        expect(_events.length).to.be.eq(idx + 1);
+      } catch (err) {
+        _events.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
 
-          throw err;
-        }
+        throw err;
       }
     });
   });
