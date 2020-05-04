@@ -8,7 +8,7 @@ export abstract class BaseComponent {
     this.window = window;
   }
 
-  protected getWindow(): Window { return <Window>this.window; }
+  protected getWindow(): Window { return this.window as Window; }
 
   protected getDocument(): Document { return this.getWindow().document; }
 

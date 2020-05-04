@@ -10,7 +10,7 @@ function getUrlFullPath(document: Document, url: string): string {
 
   const a = document.createElement('a');
   a.setAttribute('href', url);
-  return a.protocol + "//" + a.hostname + (a.port && ":" + a.port) + a.pathname;
+  return a.protocol + '//' + a.hostname + (a.port && ':' + a.port) + a.pathname;
 }
 
 export { getUrlFullPath };

@@ -1,5 +1,6 @@
 module.exports = {
   input: './dist/js/index.js',
+  context: 'window',
   output: {
     dir: './dist/bundle/',
     format: 'umd',

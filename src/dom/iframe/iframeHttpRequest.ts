@@ -2,6 +2,7 @@ import { generateUniqueId } from '../document/generateIds';
 import { appendDataToForm } from '../form/appendDataToForm';
 import { getUrlFullPath } from '../document/getUrlFullPath';
 import { BaseComponent } from '../../contracts/index';
+// tslint:disable: interface-name
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;
@@ -23,8 +24,8 @@ export interface IframeHttpRequestOptions {
  * @property error The error in case of the promise beeing rejected or the null in case of success.
  */
 export interface IframeHttpResponse {
-  data: string,
-  error: Error | null
+  data: string;
+  error: Error | null;
 }
 
 /**
@@ -51,7 +52,7 @@ export class IframeHttpRequest extends BaseComponent {
   public static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
     redirectTimeout: 3 * 1000
-  }
+  };
 
   /**
    * Object constructor
@@ -74,7 +75,7 @@ export class IframeHttpRequest extends BaseComponent {
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
     this.data = data;
     this.method = method;
-    this.options = <IframeHttpRequestOptions>Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options);
+    this.options = (Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options) as IframeHttpRequestOptions);
     this.resolvePromise = null;
     this.rejectPromise = null;
     this.loadHandlerRef = (e: Event) => this.loadHandler(e);
@@ -108,8 +109,8 @@ export class IframeHttpRequest extends BaseComponent {
     const wrapper = this.getDocument().getElementById(this.wrapperId);
 
     if (wrapper) {
-      (<HTMLIFrameElement>wrapper.querySelector('iframe')).removeEventListener('load', <LoadHandlerFunctionType>this.loadHandlerRef, false);
-      (<HTMLElement>wrapper.parentElement).removeChild(wrapper);
+      (wrapper.querySelector('iframe') as HTMLIFrameElement).removeEventListener('load', this.loadHandlerRef as LoadHandlerFunctionType, false);
+      (wrapper.parentElement as HTMLElement).removeChild(wrapper);
     }
 
     this.loadHandlerRef = null;
@@ -144,7 +145,7 @@ export class IframeHttpRequest extends BaseComponent {
     wrapper.style.display = 'none';
     wrapper.innerHTML = `<form target="${iframeId}"></form><iframe id="${iframeId}" name="${iframeId}" width="0" height="0" src="about:blank"></iframe>`;
 
-    const form = <HTMLFormElement>wrapper.querySelector('form');
+    const form = wrapper.querySelector('form') as HTMLFormElement;
     form.action = this.url;
     form.method = this.method;
     form.target = iframeId;
@@ -155,9 +156,9 @@ export class IframeHttpRequest extends BaseComponent {
     fragment.appendChild(wrapper);
     this.getDocument().body.appendChild(fragment);
 
-    const iframe = <HTMLIFrameElement>wrapper.querySelector('iframe');
+    const iframe = wrapper.querySelector('iframe') as HTMLIFrameElement;
 
-    iframe.addEventListener('load', <LoadHandlerFunctionType>this.loadHandlerRef, false)
+    iframe.addEventListener('load', this.loadHandlerRef as LoadHandlerFunctionType, false);
   }
 
   private sendAsyncCore(): Promise<IframeHttpResponse> {
@@ -165,9 +166,9 @@ export class IframeHttpRequest extends BaseComponent {
       this.resolvePromise = resolve;
       this.rejectPromise = reject;
 
-      const wrapper = <HTMLDivElement>this.getDocument().getElementById(this.wrapperId);
+      const wrapper = this.getDocument().getElementById(this.wrapperId) as HTMLDivElement;
       try {
-        (<HTMLFormElement>wrapper.querySelector('form')).submit();
+        (wrapper.querySelector('form') as HTMLFormElement).submit();
         this.timeoutRef = this.getWindow().setTimeout(() => {
             this.reject(new Error('TIMEOUT'));
           },
@@ -184,12 +185,12 @@ export class IframeHttpRequest extends BaseComponent {
     const allowRedirects = this.options.redirectTimeout > 0;
 
     try {
-      const contentWindow = <Window>(<HTMLIFrameElement>event.target).contentWindow;
+      const contentWindow = (event.target as HTMLIFrameElement).contentWindow as Window;
       // this should throw if iframe is not accessible due to 'X-Frame-Options'
       const targetPath = getUrlFullPath(contentWindow.document, contentWindow.location.href).toLowerCase();
-      const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase()
+      const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase();
       const result:IframeHttpResponse = {
-        data: <string>contentWindow.document.body.textContent,
+        data: contentWindow.document.body.textContent as string,
         error: null
       };
 
@@ -221,12 +222,12 @@ export class IframeHttpRequest extends BaseComponent {
   }
 
   private resolve(value: IframeHttpResponse): void {
-    (<ResolvePromiseFunctionType<IframeHttpResponse>>this.resolvePromise)(value);
+    (this.resolvePromise as ResolvePromiseFunctionType<IframeHttpResponse>)(value);
     this.dispose();
   }
 
   private reject(error: Error): void {
-    (<RejectPromiseFunctionType>this.rejectPromise)({ data: '', error: error });
+    (this.rejectPromise as RejectPromiseFunctionType)({ data: '', error: error });
     this.dispose();
   }
 }

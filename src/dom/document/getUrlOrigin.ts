@@ -10,7 +10,7 @@ function getUrlOrigin(document: Document, url: string): string {
 
   const a = document.createElement('a');
   a.setAttribute('href', url);
-  return a.protocol + "//" + a.hostname + (a.port && ":" + a.port);
+  return a.protocol + '//' + a.hostname + (a.port && ':' + a.port);
 }
 
 export { getUrlOrigin };

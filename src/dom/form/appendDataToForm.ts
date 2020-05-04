@@ -26,6 +26,7 @@ function appendData(ownerDocument: Document, form: HTMLFormElement, data: any, p
  * @param form The form (HTMLFormElement) element to elements to
  * @throws {Error} if the ´form´ does not have an 'ownerDocument'
  */
+// tslint:disable-next-line: ban-types
 function appendDataToForm(data: Object | null, form: HTMLFormElement): void {
   if (!data)
     return;

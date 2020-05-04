@@ -18,6 +18,7 @@
     "rollup": "2.3.3",
     "source-map-support": "0.5.16",
     "ts-node": "8.8.2",
+    "tslint": "6.1.2",
     "typescript": "3.8.3",
     "uglify-js": "3.8.1"
   },
@@ -25,9 +26,10 @@
     "clean": "node ./.build/clean.js",
     "prebuild": "npm run clean",
     "build": "tsc --module es2015 && rollup --config ./rollup.config.js && node ./.build/minify.js",
-    "test": "nyc mocha",
+    "test": "npm run lint && nyc mocha",
     "predocs": "npm run test && npm run build",
-    "docs": "rollup --config ./rollup.config.js --dir ./docs/lib/bundle/"
+    "docs": "rollup --config ./rollup.config.js --dir ./docs/lib/bundle/",
+    "lint": "tslint --config ./tslint.json --project ./tsconfig.json --format stylish"
   },
   "repository": {
     "type": "git",

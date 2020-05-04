@@ -11,12 +11,12 @@ function writeMinifiedFileSync(path, content, encding) {
 }
 
 
-// _glob
-//   .sync('./dist/bundle/**/*.js', [])
-//   .forEach(f => {
-//     console.log(_uglifyJS.minify(_fs.readFileSync(f, 'utf8'), {}))
-//     writeMinifiedFileSync(f, _uglifyJS.minify(_fs.readFileSync(f, 'utf8'), {
+_glob
+  .sync('./dist/bundle/**/*.js', [])
+  .forEach(f => {
+    //console.log(_uglifyJS.minify(_fs.readFileSync(f, 'utf8'), {}))
+    writeMinifiedFileSync(f, _uglifyJS.minify(_fs.readFileSync(f, 'utf8'), {
 
-//     }).code, 'utf8');
-//     console.log(`Minified "${f}"`);
-//   });
+    }).code, 'utf8');
+    console.log(`Minified "${f}"`);
+  });

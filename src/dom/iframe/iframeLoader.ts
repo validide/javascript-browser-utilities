@@ -1,6 +1,7 @@
-import { BaseComponent } from "../../contracts/index";
-import { generateUniqueId, getUrlOrigin } from "../document/index";
-import { getHashCode } from "../../infrastructure/index";
+import { BaseComponent } from '../../contracts/index';
+import { generateUniqueId, getUrlOrigin } from '../document/index';
+import { getHashCode } from '../../infrastructure/index';
+// tslint:disable: interface-name
 
 export enum IframeMessageState {
   Mounted = 0,
@@ -71,7 +72,7 @@ export interface IframeLoaderOptions {
   url: string;
   parent?: string | HTMLElement;
   events?: IframeLoaderEvents;
-  iframeAttributes?: { [key: string]: string; }
+  iframeAttributes?: { [key: string]: string };
 }
 
 /**
@@ -119,13 +120,13 @@ export class IframeLoader extends BaseComponent {
     this.triggerEvent(IframeLoaderEventType.BeforeDestroy);
 
     if (this.onIframeLoaded) {
-      (<HTMLIFrameElement>this.getIframe()).removeEventListener('load', this.onIframeLoaded);
+      (this.getIframe() as HTMLIFrameElement).removeEventListener('load', this.onIframeLoaded);
     }
-    this,this.iframeLoaded = false;
-    (<HTMLElement>(<HTMLDivElement>this.rootElement).parentElement).removeChild(<HTMLDivElement>this.rootElement);
+    this.iframeLoaded = false;
+    ((this.rootElement as HTMLDivElement).parentElement as HTMLElement).removeChild(this.rootElement as HTMLDivElement);
     this.rootElement = null;
 
-    this.getWindow().removeEventListener('message', <MessageEventHandlerFunctionType>this.onMessageRecieved);
+    this.getWindow().removeEventListener('message', this.onMessageRecieved as MessageEventHandlerFunctionType);
     this.onMessageRecieved = null;
 
     this.triggerEvent(IframeLoaderEventType.Destroyed);
@@ -150,16 +151,17 @@ export class IframeLoader extends BaseComponent {
     const opt = this.getOptions();
     if (opt.iframeAttributes) {
       const keys = Object.keys(opt.iframeAttributes);
+      // tslint:disable-next-line: prefer-for-of
       for (let index = 0; index < keys.length; index++) {
         const key = keys[index];
-        iframe.setAttribute(key, opt.iframeAttributes[key])
+        iframe.setAttribute(key, opt.iframeAttributes[key]);
       }
     }
 
-    iframe.addEventListener('load', <GenericEventHandlerFunctionType>this.onIframeLoaded);
+    iframe.addEventListener('load', this.onIframeLoaded as GenericEventHandlerFunctionType);
     iframe.setAttribute('src', opt.url);
     this.iframeId = generateUniqueId(this.getDocument(), 'ildr-');
-    (<HTMLDivElement>this.rootElement).appendChild(iframe);
+    (this.rootElement as HTMLDivElement).appendChild(iframe);
   }
 
   private createRootElement(): void {
@@ -214,7 +216,7 @@ export class IframeLoader extends BaseComponent {
   }
 
   private getIframe(): HTMLIFrameElement | null {
-    return (<HTMLDivElement>this.rootElement).querySelector('iframe');
+    return (this.rootElement as HTMLDivElement).querySelector('iframe');
   }
 
   private iframeLoadedHandler(event: Event): void {
@@ -267,7 +269,7 @@ export class IframeLoader extends BaseComponent {
   }
 
   private getOptions(): IframeLoaderOptions {
-    return (<IframeLoaderOptions>this.options);
+    return (this.options as IframeLoaderOptions);
   }
 
   private shouldShakeHands(message: IframeMessage): boolean {
@@ -292,7 +294,7 @@ export class IframeLoader extends BaseComponent {
       responseMessage.data = hash;
     }
 
-    (<Window>(<HTMLIFrameElement>this.getIframe()).contentWindow).postMessage(responseMessage, this.getIframeOrigin());
+    ((this.getIframe() as HTMLIFrameElement).contentWindow as Window).postMessage(responseMessage, this.getIframeOrigin());
   }
 }
 
@@ -303,7 +305,7 @@ export class IframeContent extends BaseComponent {
   private iframeId: string;
   private parentOrigin: string;
   private onMessageRecieved: null | MessageEventHandlerFunctionType;
-  private messageQueue: Array<IframeMessage>;
+  private messageQueue: IframeMessage[];
   private standalone: boolean;
   private disposed: boolean;
 
@@ -315,7 +317,7 @@ export class IframeContent extends BaseComponent {
   constructor(window: Window, parentOrigin: string) {
     super(window);
     if (typeof parentOrigin !== 'string' || parentOrigin.length === 0)
-      throw new Error(`Parent origin("parentOrigin") should be a non-empty string.`);
+      throw new Error('Parent origin("parentOrigin") should be a non-empty string.');
 
     this.standalone = window === window.parent;
     this.parentOrigin = parentOrigin;
@@ -423,6 +425,7 @@ export class IframeContent extends BaseComponent {
   private flushMessages(): void {
     const win = this.getWindow();
 
+    // tslint:disable-next-line: prefer-for-of
     for (let index = 0; index < this.messageQueue.length; index++) {
       const msg = this.messageQueue[index];
       msg.id = this.iframeId;
