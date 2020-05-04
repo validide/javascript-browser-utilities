@@ -16,6 +16,6 @@ export function test_getRandomString() {
       values.forEach((v, i, arr) => {
         expect(arr.indexOf(v)).to.be.eq(i);
       });
-    })
-  })
+    });
+  });
 }

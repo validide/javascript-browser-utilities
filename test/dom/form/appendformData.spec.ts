@@ -8,7 +8,7 @@ export function test_appendformData() {
     () => {
       let form: HTMLFormElement;
       beforeEach(() => {
-        const formOrNull = new JSDOM(`<!DOCTYPE html><form></form>`).window.document.querySelector('form');
+        const formOrNull = new JSDOM('<!DOCTYPE html><form></form>').window.document.querySelector('form');
         if (!formOrNull)
           throw new Error('Setup failure!');
         form = formOrNull;
@@ -16,28 +16,30 @@ export function test_appendformData() {
 
       it('should throw an error if "ownerDocument" is null', () => {
         expect(
-          () => appendDataToForm({}, <HTMLFormElement>(<unknown>{ ownerDocument: null }))
+          () => appendDataToForm({}, ({ ownerDocument: null } as unknown) as HTMLFormElement)
         ).throws(Error, 'The "ownerDocument" of the "form" shold be the a reference to the parent window!');
-      })
+      });
 
       it('should not add any data if "undefined"', () => {
-        appendDataToForm(<Object>(<unknown>undefined), form);
+        // tslint:disable-next-line: ban-types
+        appendDataToForm((undefined as unknown) as Object, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
-      })
+      });
 
       it('should not add any data if "null"', () => {
-        appendDataToForm(<Object>(<unknown>null), form);
+        // tslint:disable-next-line: ban-types
+        appendDataToForm((null as unknown) as Object, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
-      })
+      });
 
       it('should not add any data if "empty" data object', () => {
         appendDataToForm({}, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
-      })
+      });
 
 
       it('should add the data', () => {
-        var now = new Date();
+        const now = new Date();
         appendDataToForm({
           num: 1,
           falseBool: false,
@@ -76,6 +78,6 @@ export function test_appendformData() {
         expect(form.querySelector<HTMLInputElement>('input[name="another_object[value]"]')?.value).to.eq('whatever');
         expect(form.querySelector<HTMLInputElement>('input[name="array[0][key1][name]"]')?.value).to.eq('key1');
         expect(form.querySelector<HTMLInputElement>('input[name="array[1][key2][name]"]')?.value).to.eq('key2');
-      })
-    })
+      });
+    });
 }

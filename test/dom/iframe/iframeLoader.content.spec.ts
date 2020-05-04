@@ -18,19 +18,19 @@ export function test_iframeLoader_content() {
 
     afterEach(() => {
       _win.close();
-    })
+    });
 
     it('should have a valid window reference', () => {
       expect(
-        () => new IframeContent(<Window>(<unknown>null), '')
+        () => new IframeContent((null as unknown) as Window, '')
       ).throws(Error, 'Missing "window" reference.');
-    })
+    });
 
     it('should have a valid origin string', () => {
       expect(
         () => new IframeContent(_win, '')
       ).throws(Error, 'Parent origin("parentOrigin") should be a non-empty string.');
-    })
+    });
 
     it('calling dispose multiple times does not throw an error', () => {
       expect(
@@ -40,14 +40,14 @@ export function test_iframeLoader_content() {
           content.dispose();
         }
       ).not.throws();
-    })
+    });
 
 
 
-    it('should not post any messages when current window === window.parent', (done) => {
+    it('should not post any messages when current window === window.parent',done => {
       const messages = new Array<any>();
 
-      _win.addEventListener('message', (e) => {
+      _win.addEventListener('message',e => {
         if (e.data === 'end-the-unit-test') {
           expect(messages.length).to.be.eq(0);
           done();
@@ -55,14 +55,14 @@ export function test_iframeLoader_content() {
         }
 
         messages.push(e.data);
-      })
+      });
 
       const content = new IframeContent(_win, 'http://localhost:81');
       content.signalBusyState(false);
 
-      _win.postMessage('end-the-unit-test', '*')
-    })
-  })
+      _win.postMessage('end-the-unit-test', '*');
+    });
+  });
 
   describe('IframeContent - Not Standalone', () => {
     let _win: Window;
@@ -85,19 +85,19 @@ export function test_iframeLoader_content() {
 
     afterEach(() => {
       _win.close();
-    })
+    });
 
     it('should have a valid window reference', () => {
       expect(
-        () => new IframeContent(<Window>(<unknown>null), '')
+        () => new IframeContent((null as unknown) as Window, '')
       ).throws(Error, 'Missing "window" reference.');
-    })
+    });
 
     it('should have a valid origin string', () => {
       expect(
         () => new IframeContent(_win, '')
       ).throws(Error, 'Parent origin("parentOrigin") should be a non-empty string.');
-    })
+    });
 
     it('calling dispose multiple times does not throw an error', () => {
       expect(
@@ -107,12 +107,12 @@ export function test_iframeLoader_content() {
           content.dispose();
         }
       ).not.throws();
-    })
+    });
 
-    it('should have only 1 event as handshake did not happen', (done) => {
+    it('should have only 1 event as handshake did not happen',done => {
       const messages = new Array<any>();
 
-      _parent.addEventListener('message', (e) => {
+      _parent.addEventListener('message',e => {
         if (e.data === 'end-the-unit-test') {
           expect(messages.length).to.be.eq(1);
           expect(messages[0].id).to.be.eq('');
@@ -123,28 +123,28 @@ export function test_iframeLoader_content() {
         }
 
         messages.push(e.data);
-      })
+      });
 
       const content = new IframeContent(_win, 'http://localhost:81');
       content.signalBusyState(false);
-      _parent.postMessage('end-the-unit-test', 'http://localhost:81')
-    })
+      _parent.postMessage('end-the-unit-test', 'http://localhost:81');
+    });
 
-    it('should have all messages after handshake', (done) => {
+    it('should have all messages after handshake',done => {
       const messages = new Array<IframeMessage>();
       const content = new IframeContent(_win, 'http://localhost:81');
       const idValue = 'id-value';
 
       // DIRTY HACK to bypass message sending and play with the origin.
       function postMessage(data: IframeMessage, origin: string) {
-        (<any>content).windowMessageHandler(<unknown>{ data: data, origin: origin })
+        (content as any).windowMessageHandler({ data: data, origin: origin } as unknown);
       }
 
-      _parent.addEventListener('message', (e) => {
+      _parent.addEventListener('message',e => {
         if (e.data === 'end-the-unit-test') {
           try {
-            //console.log(JSON.stringify(messages, undefined, 2))
-            //expect(messages.length).to.be.eq(2);
+            // console.log(JSON.stringify(messages, undefined, 2))
+            // expect(messages.length).to.be.eq(2);
             let idx = 0;
             // Handshake init event
             expect(messages[idx].id).to.be.eq('');
@@ -169,7 +169,7 @@ export function test_iframeLoader_content() {
             expect(messages[idx].data).to.be.eq(undefined);
 
             idx++;
-            //Busy from EVT_PRE_HS
+            // Busy from EVT_PRE_HS
             expect(messages[idx].id).to.be.eq(idValue);
             expect(messages[idx].state).to.be.eq(IframeMessageState.BeforeUpdate);
             expect(messages[idx].data).to.be.eq(undefined);
@@ -216,17 +216,17 @@ export function test_iframeLoader_content() {
         }
 
         messages.push(e.data);
-      })
+      });
 
       // this should be ignored by "content" due to origin
       _win.postMessage(undefined, 'http://localhost:91');
 
       falsies.forEach(f => {
-        postMessage(<any><unknown>f, 'http://localhost:81');
-        postMessage({ id: '', state: IframeMessageState.Mounted, data: <any><unknown>f }, 'http://localhost:81');
+        postMessage(f as unknown as any, 'http://localhost:81');
+        postMessage({ id: '', state: IframeMessageState.Mounted, data: f as unknown as any }, 'http://localhost:81');
       });
 
-      //EVT_PRE_HS Scheduled to be delivered after handshake
+      // EVT_PRE_HS Scheduled to be delivered after handshake
       content.signalBusyState(true);
 
 
@@ -241,6 +241,6 @@ export function test_iframeLoader_content() {
       content.signalBusyState(true);
       content.signalBusyState(false);
       _parent.postMessage('pre-end-the-unit-test', 'http://localhost:81');
-    })
-  })
+    });
+  });
 }

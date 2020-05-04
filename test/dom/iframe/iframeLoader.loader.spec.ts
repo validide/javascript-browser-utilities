@@ -2,7 +2,7 @@
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { IframeLoaderOptions, IframeLoaderEvent, IframeLoaderEvents, IframeLoader, IframeContent, IframeLoaderEventType, IframeMessageState, IframeMessage } from '../../../src/dom/iframe'
+import { IframeLoaderOptions, IframeLoaderEvent, IframeLoaderEvents, IframeLoader, IframeContent, IframeLoaderEventType, IframeMessageState, IframeMessage } from '../../../src/dom/iframe';
 import { falsies } from '../../utils';
 import { getHashCode } from '../../../src/infrastructure';
 
@@ -24,15 +24,15 @@ export function test_iframeLoader_loader() {
       expect(options.url).to.eq('http://foo.bar');
       expect(options.parent).to.eq('#aaa');
       expect(options.events).to.not.eq(undefined);
-      expect((<IframeLoaderEvents>options.events).beforeUpdate).to.not.eq(undefined);
-    })
-  })
+      expect((options.events as IframeLoaderEvents).beforeUpdate).to.not.eq(undefined);
+    });
+  });
 
   describe('IframeLoader', () => {
     let _jsDom: JSDOM;
-    let _events = new Array<IframeLoaderEvent>();
-    let evtHandler = (e: IframeLoaderEvent) => { _events.push(e); };
-    let _options: IframeLoaderOptions = {
+    const _events = new Array<IframeLoaderEvent>();
+    const evtHandler = (e: IframeLoaderEvent) => { _events.push(e); };
+    const _options: IframeLoaderOptions = {
       url: 'http://localhost:81/child',
       parent: 'body',
       events: {
@@ -48,7 +48,7 @@ export function test_iframeLoader_loader() {
       iframeAttributes: {
         'allowtransparency': 'true'
       }
-    }
+    };
     let _win: Window;
     let _testLoader: IframeLoader;
 
@@ -65,58 +65,58 @@ export function test_iframeLoader_loader() {
       _events.length = 0;
       _win.close();
       _jsDom.window.close();
-    })
+    });
 
     it('should have a valid window reference', () => {
       expect(
-        () => new IframeLoader(<Window>(<unknown>null), { url: '' })
+        () => new IframeLoader((null as unknown) as Window, { url: '' })
       ).throws(Error, 'Missing "window" reference.');
-    })
+    });
 
     falsies.forEach(f => {
       it(`should have a valid option parameter: ${f}`, () => {
         expect(
-          () => new IframeLoader(_win, <IframeLoaderOptions><unknown>f)
+          () => new IframeLoader(_win, f as unknown as IframeLoaderOptions)
         ).throws(Error, 'The "options.url" value should be a non-empty string.');
-      })
+      });
     });
 
     it('should have a valid url option', () => {
       expect(
         () => new IframeLoader(_win, { url: '' })
       ).throws(Error, 'The "options.url" value should be a non-empty string.');
-    })
+    });
 
     it('should have a valid parent option', () => {
-      let parent: any = undefined;
+      let parent: any;
       expect(
-        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent })
+        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent: parent })
       ).throws(Error, `Failed to find parent "${parent}".`);
 
       parent = '';
       expect(
-        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent })
+        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent: parent })
       ).throws(Error, `Failed to find parent "${parent}".`);
 
       parent = '#some-random-id';
       expect(
-        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent })
+        () => new IframeLoader(_win, { url: 'http://localhost:81/child', parent: parent })
       ).throws(Error, `Failed to find parent "${parent}".`);
-    })
+    });
 
     it('failing event handlers should not fail the operation', () => {
       let errorMessage = '';
-      var originalConsoleError = console.error;
-      console.error = function(message?: any, ...optionalParams: any[]) {
+      const originalConsoleError = console.error;
+      console.error = (message?: any, ...optionalParams: any[]) => {
         errorMessage = message;
-      }
+      };
 
       const loader = new IframeLoader(
         _win, {
           url: 'http://localhost:81/child',
           parent: _win.document.body,
           events: {
-            beforeDestroy: function(e) {
+            beforeDestroy: () => {
               throw new Error('test');
             }
           }
@@ -125,18 +125,18 @@ export function test_iframeLoader_loader() {
       expect(() => { loader.dispose(); }).not.throws();
       expect(errorMessage).to.eq(`Calling the "${IframeLoaderEventType.BeforeDestroy}" handler failed.`);
       console.error = originalConsoleError;
-    })
+    });
 
     it('failing event handlers should not fail the operation if console is missing method', () => {
-      var originalConsoleError = console.error;
-      (<any>console).error = undefined;
+      const originalConsoleError = console.error;
+      (console as any).error = undefined;
 
       const loader = new IframeLoader(
         _win, {
           url: 'http://localhost:81/child',
           parent: _win.document.body,
           events: {
-            beforeDestroy: function(e) {
+            beforeDestroy: () => {
               throw new Error('test');
             }
           }
@@ -144,17 +144,17 @@ export function test_iframeLoader_loader() {
       );
       expect(() => { loader.dispose(); }).not.throws();
       console.error = originalConsoleError;
-    })
+    });
 
     it('calling dispose multiple times does not throw an error', () => {
       expect(
         () => {
-          const loader = new IframeLoader(_win, { url: 'http://localhost:81/child', parent: _win.document.body })
+          const loader = new IframeLoader(_win, { url: 'http://localhost:81/child', parent: _win.document.body });
           loader.dispose();
           loader.dispose();
         }
       ).not.throws();
-    })
+    });
 
     // should not throw error
     falsies.forEach(f => {
@@ -162,38 +162,38 @@ export function test_iframeLoader_loader() {
         expect(
           () => {
             const loader = new IframeLoader(_win, { url: 'http://localhost:81/child', parent: _win.document.body });
-            (<any>loader).onIframeLoaded = f;
+            (loader as any).onIframeLoaded = f;
             loader.dispose();
           }
         ).not.throws();
-      })
+      });
     });
 
 
 
     it('calling init multiple times(hacky) does not add extra elements', () => {
-      (<any>_testLoader).init();
-      (<any>_testLoader).init();
-      (<any>_testLoader).init();
+      (_testLoader as any).init();
+      (_testLoader as any).init();
+      (_testLoader as any).init();
       expect(_win.document.body.children.length).to.eq(1);
-    })
+    });
 
-    it('message handling', (done) => {
+    it('message handling',done => {
       const winMessages = new Array<IframeMessage>();
-      const idValue = (<any>_testLoader).iframeId;
+      const idValue = (_testLoader as any).iframeId;
       const origin = 'http://localhost:81';
 
       // DIRTY HACK to bypass message sending and play with the origin.
-      function postMessage(data: IframeMessage, origin: string) {
+      function postMessage(data: IframeMessage, origin_: string) {
         // add it to the queue
-        _win.postMessage(data, origin);
+        _win.postMessage(data, origin_);
 
         // trigger hander to "test it"
-        (<any>_testLoader).windowMessageHandler(<unknown>{ data: data, origin: origin })
+        (_testLoader as any).windowMessageHandler({ data: data, origin: origin_ } as unknown);
       }
 
 
-      _win.addEventListener('message', (e) => {
+      _win.addEventListener('message',e => {
         if (e.data === 'end-the-unit-test') {
           try{
             assertMessageQueue();
@@ -211,14 +211,14 @@ export function test_iframeLoader_loader() {
         }
 
         winMessages.push(e.data);
-      })
+      });
 
       let contentIframeId = '';
-      const childWin = <Window>(<HTMLIFrameElement>_win.document.querySelector('iframe')).contentWindow;
-      childWin.addEventListener('message', function (event: MessageEvent) {
-          //console.log('CHILD: ' + JSON.stringify(event.data));
-          const messageData = event.data
-            ? event.data as any
+      const childWin = (_win.document.querySelector('iframe') as HTMLIFrameElement).contentWindow as Window;
+      childWin.addEventListener('message', (event_: MessageEvent) => {
+          // console.log('CHILD: ' + JSON.stringify(event.data));
+          const messageData = event_.data
+            ? event_.data as any
             : null;
 
           if (!messageData) {
@@ -248,16 +248,16 @@ export function test_iframeLoader_loader() {
         });
 
         // EVT BEFORE LOAD
-        postMessage(<any>undefined, origin);
+        postMessage(undefined as any, origin);
         const event = _win.document.createEvent('Event');
         event.initEvent('load', true, true);
-        (<HTMLIFrameElement>_win.document.querySelector('iframe')).dispatchEvent(event);
-        (<HTMLIFrameElement>_win.document.querySelector('iframe')).dispatchEvent(event);
+        (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
+        (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
 
       // should not throw error
       falsies.forEach(f => {
         expect(() => {
-          postMessage(<any>f, origin);
+          postMessage(f as any, origin);
         }).not.throws();
       });
 
@@ -289,12 +289,12 @@ export function test_iframeLoader_loader() {
         // EVT_MOUNTED
         postMessage({ id: id, state: IframeMessageState.Mounted }, origin);
         // EVT_DEFAULT
-        postMessage({ id: id, state: <IframeMessageState>-1 }, origin);
+        postMessage({ id: id, state: -1 as IframeMessageState }, origin);
         // EVT8
         postMessage({ id: id, state: IframeMessageState.Destroyed }, origin);
       }
 
-      setTimeout(function() {
+      setTimeout(() => {
         _win.postMessage('pre-end-the-unit-test', origin);
       }, 1);
 
@@ -310,7 +310,7 @@ export function test_iframeLoader_loader() {
 
           // EVT BEFORE LOAD
           idx++;
-          expect(winMessages[idx]).to.be.eq(undefined, `EVT_BEFORE_LOAD`);
+          expect(winMessages[idx]).to.be.eq(undefined, 'EVT_BEFORE_LOAD');
 
           falsies.forEach(f => {
             // ignore due to "mising" data
@@ -382,7 +382,7 @@ export function test_iframeLoader_loader() {
           // EVT_DEFAULT
           idx++;
           expect(winMessages[idx].id).to.be.eq(idValue, `ID_EVT_DEFAULT(${idx})`);
-          expect(winMessages[idx].state).to.be.eq(<IframeMessageState>-1, `STATE_EVT_DEFAULT(${idx})`);
+          expect(winMessages[idx].state).to.be.eq(-1 as IframeMessageState, `STATE_EVT_DEFAULT(${idx})`);
           expect(winMessages[idx].data).to.be.eq(undefined, `DATA_EVT_DEFAULT(${idx})`);
 
           // destroy - EVT8
@@ -393,7 +393,7 @@ export function test_iframeLoader_loader() {
 
           expect(winMessages.length).to.be.eq(idx + 1);
         } catch (err) {
-          //console.log(JSON.stringify(winMessages, undefined, 2))
+          // console.log(JSON.stringify(winMessages, undefined, 2))
           winMessages.forEach(f => console.log(JSON.stringify(f, undefined, 0)));
 
           throw err;
@@ -478,6 +478,6 @@ export function test_iframeLoader_loader() {
           throw err;
         }
       }
-    })
+    });
   });
 }

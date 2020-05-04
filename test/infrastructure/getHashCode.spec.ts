@@ -9,6 +9,6 @@ export function test_getHashCode() {
       const value = 'some string';
       expect(getHashCode(value)).to.eq(getHashCode(value));
       expect(getHashCode('')).to.be.eq(0);
-    })
-  })
+    });
+  });
 }

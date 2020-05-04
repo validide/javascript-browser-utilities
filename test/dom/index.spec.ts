@@ -8,5 +8,5 @@ export function test_dom() {
     testDocumentModule();
     testFromModule();
     testIframeModule();
-  })
+  });
 }

@@ -7,5 +7,5 @@ export function testIframeModule() {
     test_iframeHttpRequest();
     test_iframeLoader_content();
     test_iframeLoader_loader();
-  })
+  });
 }

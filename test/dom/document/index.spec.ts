@@ -8,5 +8,5 @@ export function testDocumentModule() {
     test_getUrlOrigin();
     test_getUrlFullPath();
     test_generateUniqueId();
-  })
+  });
 }

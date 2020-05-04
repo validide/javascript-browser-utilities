@@ -3,7 +3,7 @@ import { getUrlFullPath } from '../../../src/index';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 
-function getNewDocument(): Document {return new JSDOM(`<!DOCTYPE html>`).window.document};
+function getNewDocument(): Document {return new JSDOM('<!DOCTYPE html>').window.document;}
 
 export function test_getUrlFullPath() {
   describe('getUrlFullPath', () => {
@@ -11,22 +11,22 @@ export function test_getUrlFullPath() {
     beforeEach(() => { doc = getNewDocument(); });
 
     it('should return empty string if url is "undefined", "null" or empty string', () => {
-      expect(getUrlFullPath(doc, <string>(<unknown>undefined))).to.eq('');
-      expect(getUrlFullPath(doc, <string>(<unknown>null))).to.eq('');
+      expect(getUrlFullPath(doc, (undefined as unknown) as string)).to.eq('');
+      expect(getUrlFullPath(doc, (null as unknown) as string)).to.eq('');
       expect(getUrlFullPath(doc, '')).to.eq('');
-    })
+    });
 
     it('should thow an error if document is "undefined"', () => {
       expect(
-        () => getUrlFullPath(<Document>(<unknown>undefined), 'some value')
+        () => getUrlFullPath((undefined as unknown) as Document, 'some value')
       ).throws(Error, 'Cannot read property \'createElement\' of undefined');
-    })
+    });
 
     it('should thow an error if document is "null"', () => {
       expect(
-        () => getUrlFullPath(<Document>(<unknown>null), 'some value')
+        () => getUrlFullPath((null as unknown) as Document, 'some value')
       ).throws(Error, 'Cannot read property \'createElement\' of null');
-    })
+    });
 
     it('should return origin', () => {
       expect(getUrlFullPath(doc, 'http://localhost')).to.eq('http://localhost/');
@@ -40,6 +40,6 @@ export function test_getUrlFullPath() {
       expect(getUrlFullPath(doc, 'https://localhost:444/sasasasa/')).to.eq('https://localhost:444/sasasasa/');
       expect(getUrlFullPath(doc, 'http://localhost/seg-1/seg-2')).to.eq('http://localhost/seg-1/seg-2');
       expect(getUrlFullPath(doc, 'http://localhost/seg-1/seg-2?foo=1&bar=2#bzz')).to.eq('http://localhost/seg-1/seg-2');
-    })
-  })
+    });
+  });
 }
