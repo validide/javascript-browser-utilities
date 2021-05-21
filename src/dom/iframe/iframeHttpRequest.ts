@@ -2,7 +2,6 @@ import { generateUniqueId } from '../document/generateIds';
 import { appendDataToForm } from '../form/appendDataToForm';
 import { getUrlFullPath } from '../document/getUrlFullPath';
 import { BaseComponent } from '../../contracts/index';
-// tslint:disable: interface-name
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value: T | PromiseLike<T>) => void;
@@ -10,6 +9,7 @@ type RejectPromiseFunctionType = (reason: IframeHttpResponse) => void;
 
 /**
  * Configure the request options
+ *
  * @property timeout The maximum request timeout (in milliseconds). The request will be reject as TIMEOUT error if nothing happens in this interval.
  * @property redirectTimeout The maximum delay (in milliseconds) between consecutive redirect. If set to zero or less the first response is returned.
  */
@@ -20,6 +20,7 @@ export interface IframeHttpRequestOptions {
 
 /**
  * The response
+ *
  * @property data The body innerHTML in case of success or an empty string in case of error.
  * @property error The error in case of the promise beeing rejected or the null in case of success.
  */
@@ -33,8 +34,8 @@ export interface IframeHttpResponse {
  */
 export class IframeHttpRequest extends BaseComponent {
   private url: string;
-  private data: object | null = null;
-  private method: string = 'GET';
+  private data: any = null;
+  private method = 'GET';
   private options: IframeHttpRequestOptions;
 
   private resolvePromise: ResolvePromiseFunctionType<IframeHttpResponse> | null;
@@ -49,6 +50,7 @@ export class IframeHttpRequest extends BaseComponent {
   /**
    * Default options IframeHttpRequestOptions
    */
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   public static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
     redirectTimeout: 3 * 1000
@@ -56,6 +58,7 @@ export class IframeHttpRequest extends BaseComponent {
 
   /**
    * Object constructor
+   *
    * @param window A reference to the window object
    * @param url The url to make the request to
    * @param data The data to send. Default NULL
@@ -65,17 +68,18 @@ export class IframeHttpRequest extends BaseComponent {
   constructor(
     window: Window,
     url: string,
-    data: object | null = null,
-    method: string = 'GET',
+    data: any | null = null,
+    method = 'GET',
     options: IframeHttpRequestOptions | null = null
   ) {
     super(window);
 
     this.validateInput(url, method);
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.data = data;
     this.method = method;
-    this.options = (Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options) as IframeHttpRequestOptions);
+    this.options = (Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options) );
     this.resolvePromise = null;
     this.rejectPromise = null;
     this.loadHandlerRef = (e: Event) => this.loadHandler(e);
@@ -170,9 +174,9 @@ export class IframeHttpRequest extends BaseComponent {
       try {
         (wrapper.querySelector('form') as HTMLFormElement).submit();
         this.timeoutRef = this.getWindow().setTimeout(() => {
-            this.reject(new Error('TIMEOUT'));
-          },
-          this.options.timeout
+          this.reject(new Error('TIMEOUT'));
+        },
+        this.options.timeout
         );
       } catch (error) {
         this.reject(error);
@@ -198,15 +202,16 @@ export class IframeHttpRequest extends BaseComponent {
         this.resolve(result);
       } else {
         if (allowRedirects) {
-          this.schedulePromieResolve(result);
+          this.schedulePromiseResolve(result);
         } else {
           this.resolve(result);
         }
       }
     } catch (error) {
       if (allowRedirects) {
-        this.schedulePromieResolve({
+        this.schedulePromiseResolve({
           data: '',
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           error: error
         });
       } else {
@@ -215,7 +220,7 @@ export class IframeHttpRequest extends BaseComponent {
     }
   }
 
-  private schedulePromieResolve(result:IframeHttpResponse): void {
+  private schedulePromiseResolve(result:IframeHttpResponse): void {
     const win = this.getWindow();
     win.clearTimeout(this.redirectTimeoutRef);
     this.redirectTimeoutRef = win.setTimeout(() => { this.resolve(result); }, this.options.redirectTimeout);

@@ -3,11 +3,9 @@ import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 import { IframeHttpRequest, IframeHttpRequestOptions, IframeHttpResponse } from '../../../src/dom/iframe/iframeHttpRequest';
 import { falsies } from '../../utils';
-// tslint:disable: no-unused-expression
 
 function overrideFormSubmit(win: Window, req: IframeHttpRequest, overrideFunc: () => void) {
   // JSDOM does not implement HTMLFormElement.prototype.submit - Not implemented: HTMLFormElement.prototype.submit
-  // tslint:disable-next-line: ban-types
   const sendAsyncCoreOriginal: Function = (req as any).sendAsyncCore;
   (req as any).sendAsyncCore = function () {
     (win.document.querySelector('form') as HTMLFormElement).submit = overrideFunc;
@@ -89,7 +87,6 @@ export function test_iframeHttpRequest() {
         () => {
 
           const req = new IframeHttpRequest(_win, 'http://localhost/', null);
-          // tslint:disable-next-line: no-empty
           overrideFormSubmit(_win, req, () => {});
 
           req.sendAsync().catch(() => { /* ignore error for this case */ });
@@ -125,7 +122,6 @@ export function test_iframeHttpRequest() {
         expect(
           () => {
             const req = new IframeHttpRequest(_win, 'http://localhost/', (falsie as unknown) as object);
-            // tslint:disable-next-line: no-empty
             overrideFormSubmit(_win, req, () => { });
 
             req.sendAsync().catch(() => { /* ignore error for this case */ });
@@ -140,7 +136,6 @@ export function test_iframeHttpRequest() {
       expect(
         () => {
           const req = new IframeHttpRequest(_win, 'http://localhost/');
-          // tslint:disable-next-line: no-empty
           overrideFormSubmit(_win, req, () => { });
 
           req.sendAsync().catch(e => { /* ignore error for this case */ });
@@ -168,7 +163,6 @@ export function test_iframeHttpRequest() {
         redirectTimeout: 0,
         timeout: 3
       });
-      // tslint:disable-next-line: no-empty
       overrideFormSubmit(_win, req, () => { });
       return req.sendAsync()
         .catch((response: IframeHttpResponse) => {

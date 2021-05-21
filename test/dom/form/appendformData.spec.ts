@@ -21,13 +21,11 @@ export function test_appendformData() {
       });
 
       it('should not add any data if "undefined"', () => {
-        // tslint:disable-next-line: ban-types
         appendDataToForm((undefined as unknown) as Object, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
       });
 
       it('should not add any data if "null"', () => {
-        // tslint:disable-next-line: ban-types
         appendDataToForm((null as unknown) as Object, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
       });

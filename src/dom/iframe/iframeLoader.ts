@@ -1,16 +1,18 @@
 import { BaseComponent } from '../../contracts/index';
 import { generateUniqueId, getUrlOrigin } from '../document/index';
 import { getHashCode } from '../../infrastructure/index';
-// tslint:disable: interface-name
 
+/* eslint-disable @typescript-eslint/naming-convention */
 export enum IframeMessageState {
   Mounted = 0,
   BeforeUpdate = 1,
   Updated = 2,
   Destroyed = 3
 }
+/* eslint-enable @typescript-eslint/naming-convention */
+
 /**
- * Messages set between the parent/child iframe compoents
+ * Messages set between the parent/child iframe components
  */
 export interface IframeMessage {
   id: string;
@@ -24,6 +26,7 @@ type GenericEventHandlerFunctionType = (e: Event) => void;
  * IframeLoader event types.
  * The type of IframeLoaderEvent
  */
+/* eslint-disable @typescript-eslint/naming-convention */
 export enum IframeLoaderEventType {
   BeforeCreate = 'beforeCreate',
   Created = 'created',
@@ -34,6 +37,7 @@ export enum IframeLoaderEventType {
   BeforeDestroy = 'beforeDestroy',
   Destroyed = 'destroyed'
 }
+/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * IframeLoader Event
@@ -83,13 +87,14 @@ export class IframeLoader extends BaseComponent {
   private options: IframeLoaderOptions | null;
   private rootElement: HTMLDivElement | null;
   private iframeId: string;
-  private onMessageRecieved: null | MessageEventHandlerFunctionType;
+  private onMessageReceived: null | MessageEventHandlerFunctionType;
   private onIframeLoaded: null | GenericEventHandlerFunctionType;
   private iframeLoaded: boolean;
   private disposed: boolean;
 
   /**
    * Constructor.
+   *
    * @param window Reference to the window object.
    * @param options Loader options.
    */
@@ -102,8 +107,8 @@ export class IframeLoader extends BaseComponent {
     this.rootElement = null;
     this.iframeId = '';
     this.disposed = false;
-    this.onMessageRecieved = this.windowMessageHandler.bind(this);
-    window.addEventListener('message', this.onMessageRecieved);
+    this.onMessageReceived = this.windowMessageHandler.bind(this);
+    window.addEventListener('message', this.onMessageReceived);
     this.onIframeLoaded = this.iframeLoadedHandler.bind(this);
     this.iframeLoaded = false;
     this.init();
@@ -126,8 +131,8 @@ export class IframeLoader extends BaseComponent {
     ((this.rootElement as HTMLDivElement).parentElement as HTMLElement).removeChild(this.rootElement as HTMLDivElement);
     this.rootElement = null;
 
-    this.getWindow().removeEventListener('message', this.onMessageRecieved as MessageEventHandlerFunctionType);
-    this.onMessageRecieved = null;
+    this.getWindow().removeEventListener('message', this.onMessageReceived as MessageEventHandlerFunctionType);
+    this.onMessageReceived = null;
 
     this.triggerEvent(IframeLoaderEventType.Destroyed);
     this.options = null;
@@ -151,7 +156,7 @@ export class IframeLoader extends BaseComponent {
     const opt = this.getOptions();
     if (opt.iframeAttributes) {
       const keys = Object.keys(opt.iframeAttributes);
-      // tslint:disable-next-line: prefer-for-of
+      // eslint-disable-next-line @typescript-eslint/prefer-for-of
       for (let index = 0; index < keys.length; index++) {
         const key = keys[index];
         iframe.setAttribute(key, opt.iframeAttributes[key]);
@@ -188,7 +193,7 @@ export class IframeLoader extends BaseComponent {
     }
 
     if (!parent)
-      throw new Error(`Failed to find parent "${opt.parent}".`);
+      throw new Error(`Failed to find parent "${opt.parent?.toString() || ''}".`);
 
     return parent;
   }
@@ -219,7 +224,7 @@ export class IframeLoader extends BaseComponent {
     return (this.rootElement as HTMLDivElement).querySelector('iframe');
   }
 
-  private iframeLoadedHandler(event: Event): void {
+  private iframeLoadedHandler(): void {
     if (!this.iframeLoaded) {
       this.triggerEvent(IframeLoaderEventType.BeforeMount);
     }
@@ -304,13 +309,14 @@ export class IframeLoader extends BaseComponent {
 export class IframeContent extends BaseComponent {
   private iframeId: string;
   private parentOrigin: string;
-  private onMessageRecieved: null | MessageEventHandlerFunctionType;
+  private onMessageReceived: null | MessageEventHandlerFunctionType;
   private messageQueue: IframeMessage[];
   private standalone: boolean;
   private disposed: boolean;
 
   /**
    * Constructor
+   *
    * @param window Reference to the window object
    * @param parentOrigin The origin that loaded the content
    */
@@ -325,10 +331,10 @@ export class IframeContent extends BaseComponent {
     this.messageQueue = new Array<IframeMessage>();
     this.disposed = false;
     if (this.standalone) {
-      this.onMessageRecieved = null;
+      this.onMessageReceived = null;
     } else {
-      this.onMessageRecieved = this.windowMessageHandler.bind(this);
-      window.addEventListener('message', this.onMessageRecieved);
+      this.onMessageReceived = this.windowMessageHandler.bind(this);
+      window.addEventListener('message', this.onMessageReceived);
     }
 
     this.init();
@@ -336,6 +342,7 @@ export class IframeContent extends BaseComponent {
 
   /**
    * Signal busy state
+   *
    * @param busy Is the component busy?
    */
   public signalBusyState(busy: boolean): void {
@@ -357,9 +364,9 @@ export class IframeContent extends BaseComponent {
     this.disposed = true;
     this.signalBusyState(true);
 
-    if (this.onMessageRecieved) {
-      this.getWindow().removeEventListener('message', this.onMessageRecieved);
-      this.onMessageRecieved = null;
+    if (this.onMessageReceived) {
+      this.getWindow().removeEventListener('message', this.onMessageReceived);
+      this.onMessageReceived = null;
     }
 
     this.sendMessage({ id: '', state: IframeMessageState.Destroyed });
@@ -406,7 +413,7 @@ export class IframeContent extends BaseComponent {
     }
   }
 
-  private sendMessage(message: IframeMessage, bypassQueue: boolean = false): void {
+  private sendMessage(message: IframeMessage, bypassQueue = false): void {
     if (this.standalone)
       return;
 
@@ -425,7 +432,7 @@ export class IframeContent extends BaseComponent {
   private flushMessages(): void {
     const win = this.getWindow();
 
-    // tslint:disable-next-line: prefer-for-of
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let index = 0; index < this.messageQueue.length; index++) {
       const msg = this.messageQueue[index];
       msg.id = this.iframeId;

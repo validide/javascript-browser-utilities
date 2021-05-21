@@ -1,9 +1,11 @@
 /**
  * Return the origin of an url
+ *
  * @param document The reference to the document object
  * @param url The ´url´ for which to get the 'origin'
  * @returns A string representing the url origin
  */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function getUrlOrigin(document: Document, url: string): string {
   if (!url)
     return '';

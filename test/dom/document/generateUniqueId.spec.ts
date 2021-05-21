@@ -4,7 +4,6 @@ import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
 import { falsies } from '../../utils';
 
-// tslint:disable: no-unused-expression
 
 function getNewDocument(): Document { return new JSDOM('<!DOCTYPE html>').window.document; }
 
