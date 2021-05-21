@@ -1,3 +1,5 @@
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import 'mocha';
 import { test_getUrlOrigin } from './getUrlOrigin.spec';
 import { test_getUrlFullPath } from './getUrlFullPath.spec';

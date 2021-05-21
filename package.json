@@ -34,9 +34,9 @@
     "test": "npm run lint && nyc mocha",
     "predocs": "npm run test && npm run build",
     "docs": "rollup --config ./rollup.config.js --dir ./docs/lib/bundle/",
-    "lint": "npm run lint-src && lint-test",
+    "lint": "npm run lint-src && npm run lint-test",
     "lint-src": "eslint -c .eslintrc.js --ext .ts ./src",
-    "lint-test": "eslint -c .eslintrc.js --ext .ts ./test"
+    "lint-test": "eslint -c ./test/.eslintrc.js --ext .ts ./test"
   },
   "repository": {
     "type": "git",

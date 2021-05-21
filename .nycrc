@@ -12,7 +12,8 @@
     "coverage/**/*.*",
     ".build/**/*.*",
     "docs/**/*.*",
-    "rollup.config.js"
+    "rollup.config.js",
+    ".eslintrc.js"
   ],
   "reporter": [
     "text",

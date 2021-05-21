@@ -1,3 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 import 'mocha';
 import { generateUniqueId } from '../../../src/index';
 import { expect } from 'chai';
@@ -39,7 +43,7 @@ export function test_generateUniqueId() {
     it('should return an id that is unique', () => {
       let called = 0;
       const fake = {
-        getElementById: (elementId: string): HTMLElement | null => {
+        getElementById: (): HTMLElement | null => {
           if (called >= falsies.length) {
             return doc.createElement('div');
           }

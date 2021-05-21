@@ -1,3 +1,14 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
@@ -87,7 +98,7 @@ export function test_iframeHttpRequest() {
         () => {
 
           const req = new IframeHttpRequest(_win, 'http://localhost/', null);
-          overrideFormSubmit(_win, req, () => {});
+          overrideFormSubmit(_win, req, () => { /* NOOP */ });
 
           req.sendAsync().catch(() => { /* ignore error for this case */ });
           req.sendAsync().catch(() => { /* ignore error for this case */ });
@@ -118,6 +129,7 @@ export function test_iframeHttpRequest() {
     });
 
     falsies.forEach(falsie => {
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
       it(`calling send with falsie(${falsie}) data does not throw`, () => {
         expect(
           () => {
@@ -138,7 +150,7 @@ export function test_iframeHttpRequest() {
           const req = new IframeHttpRequest(_win, 'http://localhost/');
           overrideFormSubmit(_win, req, () => { });
 
-          req.sendAsync().catch(e => { /* ignore error for this case */ });
+          req.sendAsync().catch(() => { /* ignore error for this case */ });
           req.dispose();
         }
       ).not.throws();
@@ -185,7 +197,7 @@ export function test_iframeHttpRequest() {
         ifrmaeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error'); }
-          },
+          }
         } as any);
       });
       return req.sendAsync()
@@ -210,13 +222,13 @@ export function test_iframeHttpRequest() {
         ifrmaeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (1)'); }
-          },
+          }
         } as any);
 
         ifrmaeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (2)'); }
-          },
+          }
         } as any);
       });
       return req.sendAsync()
@@ -246,7 +258,7 @@ export function test_iframeHttpRequest() {
 
 
         ifrmaeRequest.loadHandler({
-          target: iframe,
+          target: iframe
         } as any);
       });
       return req.sendAsync()
@@ -273,14 +285,14 @@ export function test_iframeHttpRequest() {
         cWin = (iframe.contentWindow as Window);
         cWin.document.write('TEST_RESULT_1');
         ifrmaeRequest.loadHandler({
-          target: iframe,
+          target: iframe
         } as any);
 
         iframe.src = 'http://localhost/segment-1';
         cWin = (iframe.contentWindow as Window);
         cWin.document.write('TEST_RESULT_2');
         ifrmaeRequest.loadHandler({
-          target: iframe,
+          target: iframe
         } as any);
       });
       return req.sendAsync()
@@ -309,7 +321,7 @@ export function test_iframeHttpRequest() {
 
 
         ifrmaeRequest.loadHandler({
-          target: iframe,
+          target: iframe
         } as any);
       });
       return req.sendAsync()
@@ -338,7 +350,7 @@ export function test_iframeHttpRequest() {
 
 
         ifrmaeRequest.loadHandlerRef({
-          target: iframe,
+          target: iframe
         } as any);
       });
       return req.sendAsync()

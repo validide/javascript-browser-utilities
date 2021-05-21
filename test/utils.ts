@@ -1,8 +1,10 @@
 export const falsies = [undefined, null, false, ''];
 
-export function getDelayPromise(delayMs: number = 1, success: boolean = true): Promise<void> {
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+export function getDelayPromise(delayMs = 1, success = true): Promise<void> {
   return new Promise((res, rej) =>{
     setTimeout(() => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       success ? res() : rej();
     }, delayMs);
   });

@@ -193,7 +193,8 @@ export class IframeLoader extends BaseComponent {
     }
 
     if (!parent)
-      throw new Error(`Failed to find parent "${opt.parent?.toString() || ''}".`);
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+      throw new Error(`Failed to find parent "${opt.parent}".`);
 
     return parent;
   }

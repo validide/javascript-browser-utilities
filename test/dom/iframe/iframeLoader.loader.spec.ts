@@ -1,10 +1,19 @@
-
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/naming-convention */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable prefer-arrow/prefer-arrow-functions */
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
-import { IframeLoaderOptions, IframeLoaderEvent, IframeLoaderEvents, IframeLoader, IframeContent, IframeLoaderEventType, IframeMessageState, IframeMessage } from '../../../src/dom/iframe';
-import { falsies, getDelayPromise } from '../../utils';
+import { IframeLoader, IframeLoaderEvent, IframeLoaderEvents, IframeLoaderEventType, IframeLoaderOptions, IframeMessage, IframeMessageState } from '../../../src/dom/iframe';
 import { getHashCode } from '../../../src/infrastructure';
+import { falsies, getDelayPromise } from '../../utils';
 
 
 export function test_iframeLoader_loader() {
@@ -107,7 +116,7 @@ export function test_iframeLoader_loader() {
     it('failing event handlers should not fail the operation', () => {
       let errorMessage = '';
       const originalConsoleError = console.error;
-      console.error = (message?: any, ...optionalParams: any[]) => {
+      console.error = (message?: any) => {
         errorMessage = message;
       };
 
@@ -200,43 +209,43 @@ export function test_iframeLoader_loader() {
       let contentIframeId = '';
       const childWin = (_win.document.querySelector('iframe') as HTMLIFrameElement).contentWindow as Window;
       childWin.addEventListener('message', (event_: MessageEvent) => {
-          // console.log('CHILD: ' + JSON.stringify(event.data));
-          const messageData = event_.data
-            ? event_.data as any
-            : null;
+        // console.log('CHILD: ' + JSON.stringify(event.data));
+        const messageData = event_.data
+          ? event_.data
+          : null;
 
-          if (!messageData) {
-            return;
+        if (!messageData) {
+          return;
+        }
+
+        // In case we do not have the iframeId it means handshake did not happen.
+        if (!contentIframeId) {
+          if (!messageData.id) {
+            // Phase 1 of the handshake - we got the hash so send it back.
+            // EVT3
+            postMessage(
+              { id: contentIframeId, state: IframeMessageState.Mounted, data: messageData.data },
+              origin
+            );
           }
-
-          // In case we do not have the iframeId it means handshake did not happen.
-          if (!contentIframeId) {
-            if (!messageData.id) {
-              // Phase 1 of the handshake - we got the hash so send it back.
-              // EVT3
-              postMessage(
-                { id: contentIframeId, state: IframeMessageState.Mounted, data: messageData.data },
-                origin
-              );
-            }
-            else {
-              // Phase 2 of the handshake - we got the id.
-              contentIframeId = messageData.id;
-              postMessage(
-                { id: contentIframeId, state: IframeMessageState.Mounted, data: messageData.data },
-                origin
-              );
-              afterHandshake(contentIframeId);
-            }
+          else {
+            // Phase 2 of the handshake - we got the id.
+            contentIframeId = messageData.id;
+            postMessage(
+              { id: contentIframeId, state: IframeMessageState.Mounted, data: messageData.data },
+              origin
+            );
+            afterHandshake(contentIframeId);
           }
-        });
+        }
+      });
 
-        // EVT BEFORE LOAD
-        postMessage(undefined as any, origin);
-        const event = _win.document.createEvent('Event');
-        event.initEvent('load', true, true);
-        (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
-        (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
+      // EVT BEFORE LOAD
+      postMessage(undefined as any, origin);
+      const event = _win.document.createEvent('Event');
+      event.initEvent('load', true, true);
+      (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
+      (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
 
       // should not throw error
       falsies.forEach(f => {
