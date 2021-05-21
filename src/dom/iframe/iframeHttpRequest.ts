@@ -5,7 +5,7 @@ import { BaseComponent } from '../../contracts/index';
 // tslint:disable: interface-name
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
-type ResolvePromiseFunctionType<T> = (value?: T | PromiseLike<T>) => void;
+type ResolvePromiseFunctionType<T> = (value: T | PromiseLike<T>) => void;
 type RejectPromiseFunctionType = (reason: IframeHttpResponse) => void;
 
 /**
