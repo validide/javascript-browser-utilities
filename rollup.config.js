@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   input: './dist/js/index.js',
   context: 'window',

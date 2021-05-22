@@ -9,7 +9,7 @@ module.exports = {
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "tsconfig.json",
+        "project": "tsconfig.dev.json",
         "sourceType": "module"
     },
     "plugins": [
@@ -18,6 +18,7 @@ module.exports = {
         "eslint-plugin-prefer-arrow",
         "@typescript-eslint"
     ],
+    "ignorePatterns": [".build/**/*.*", "dist/**/*.*", "docs/**/*.*", "node_modules/**/*.*"],
     "rules": {
         "@typescript-eslint/adjacent-overload-signatures": "error",
         "@typescript-eslint/array-type": [

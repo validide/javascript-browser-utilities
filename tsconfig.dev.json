@@ -1,17 +1,15 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
-    "rootDir": "../",
+    "rootDir": "./",
     "outDir": "./.build/test-js/"
   },
-  "include": ["./**/*.ts"],
+  // "include": ["./**/*.ts"],
   "exclude": [
     ".build",
     "coverage",
     "dist",
-    "src",
     "node_modules",
-    "!node_modules/@types",
     "!node_modules/@types"
   ]
 }
