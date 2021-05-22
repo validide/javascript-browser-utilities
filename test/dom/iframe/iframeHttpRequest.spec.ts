@@ -1,14 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-empty-function */
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/ban-types */
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable no-underscore-dangle */
+/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
+
 import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
@@ -88,7 +89,7 @@ export function test_iframeHttpRequest() {
       ).throws(Error, 'Method not supported ""');
     });
 
-    it('should have a the load hander configured', () => {
+    it('should have a the load handler configured', () => {
       const req = (new IframeHttpRequest(_win, 'http://localhost/segment-1')) as any;
       expect(req.loadHandlerRef).to.not.be.null;
     });
@@ -134,7 +135,7 @@ export function test_iframeHttpRequest() {
         expect(
           () => {
             const req = new IframeHttpRequest(_win, 'http://localhost/', (falsie as unknown) as object);
-            overrideFormSubmit(_win, req, () => { });
+            overrideFormSubmit(_win, req, () => { /* NOOP */});
 
             req.sendAsync().catch(() => { /* ignore error for this case */ });
             req.dispose();
@@ -148,7 +149,7 @@ export function test_iframeHttpRequest() {
       expect(
         () => {
           const req = new IframeHttpRequest(_win, 'http://localhost/');
-          overrideFormSubmit(_win, req, () => { });
+          overrideFormSubmit(_win, req, () => { /* NOOP */});
 
           req.sendAsync().catch(() => { /* ignore error for this case */ });
           req.dispose();
@@ -175,7 +176,7 @@ export function test_iframeHttpRequest() {
         redirectTimeout: 0,
         timeout: 3
       });
-      overrideFormSubmit(_win, req, () => { });
+      overrideFormSubmit(_win, req, () => { /* NOOP */});
       return req.sendAsync()
         .catch((response: IframeHttpResponse) => {
           expect(response.data).to.eq('');
@@ -193,8 +194,8 @@ export function test_iframeHttpRequest() {
         timeout: 3
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
-        ifrmaeRequest.loadHandler({
+        const iframeRequest: any = req as any;
+        iframeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error'); }
           }
@@ -217,15 +218,15 @@ export function test_iframeHttpRequest() {
         timeout: 8
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
+        const iframeRequest: any = req as any;
 
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (1)'); }
           }
         } as any);
 
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: {
             get contentWindow(): Window { throw new Error('SIMULATED X-Frame-Options Error (2)'); }
           }
@@ -248,8 +249,8 @@ export function test_iframeHttpRequest() {
         timeout: 3
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
-        const iframe = ifrmaeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
+        const iframeRequest: any = req as any;
+        const iframe = iframeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
         iframe.src = 'http://localhost/segment-1';
 
         const cWin = iframe.contentWindow as Window;
@@ -257,7 +258,7 @@ export function test_iframeHttpRequest() {
         cWin.document.write('TEST_RESULT');
 
 
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: iframe
         } as any);
       });
@@ -277,21 +278,21 @@ export function test_iframeHttpRequest() {
         timeout: 8
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
-        const iframe = ifrmaeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
+        const iframeRequest: any = req as any;
+        const iframe = iframeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
         let cWin:Window;
 
         iframe.src = 'http://localhost/segment-2';
         cWin = (iframe.contentWindow as Window);
         cWin.document.write('TEST_RESULT_1');
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: iframe
         } as any);
 
         iframe.src = 'http://localhost/segment-1';
         cWin = (iframe.contentWindow as Window);
         cWin.document.write('TEST_RESULT_2');
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: iframe
         } as any);
       });
@@ -311,8 +312,8 @@ export function test_iframeHttpRequest() {
         timeout: 3
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
-        const iframe = ifrmaeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
+        const iframeRequest: any = req as any;
+        const iframe = iframeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
         iframe.src = 'http://localhost/segment-2';
 
         const cWin = iframe.contentWindow as Window;
@@ -320,7 +321,7 @@ export function test_iframeHttpRequest() {
         cWin.document.write('TEST_RESULT');
 
 
-        ifrmaeRequest.loadHandler({
+        iframeRequest.loadHandler({
           target: iframe
         } as any);
       });
@@ -340,8 +341,8 @@ export function test_iframeHttpRequest() {
         timeout: 3
       });
       overrideFormSubmit(_win, req, () => {
-        const ifrmaeRequest: any = req as any;
-        const iframe = ifrmaeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
+        const iframeRequest: any = req as any;
+        const iframe = iframeRequest.getDocument().querySelector('iframe') as HTMLIFrameElement;
         iframe.src = 'http://localhost/segment-2';
 
         const cWin = iframe.contentWindow as Window;
@@ -349,7 +350,7 @@ export function test_iframeHttpRequest() {
         cWin.document.write('TEST_RESULT');
 
 
-        ifrmaeRequest.loadHandlerRef({
+        iframeRequest.loadHandlerRef({
           target: iframe
         } as any);
       });
