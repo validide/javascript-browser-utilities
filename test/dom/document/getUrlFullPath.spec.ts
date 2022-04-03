@@ -31,13 +31,13 @@ export function test_getUrlFullPath() {
     it('should thow an error if document is "undefined"', () => {
       expect(
         () => getUrlFullPath((undefined as unknown) as Document, 'some value')
-      ).throws(Error, 'Cannot read property \'createElement\' of undefined');
+      ).throws(Error, /Cannot read propert[y|ies].* of undefined/gmi);
     });
 
     it('should thow an error if document is "null"', () => {
       expect(
         () => getUrlFullPath((null as unknown) as Document, 'some value')
-      ).throws(Error, 'Cannot read property \'createElement\' of null');
+      ).throws(Error, /Cannot read propert[y|ies].* of null/gmi);
     });
 
     it('should return origin', () => {
