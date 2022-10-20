@@ -1,8 +1,8 @@
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = global || self, factory(global.validide_jbu = {}));
-}(this, (function (exports) { 'use strict';
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.validide_jbu = {}));
+})(this, (function (exports) { 'use strict';
 
     var BaseComponent = /** @class */ (function () {
         function BaseComponent(window) {
@@ -118,12 +118,12 @@
             }
             else {
                 Object.keys(data).forEach(function (prop) {
-                    appendData(ownerDocument, form, data[prop], parentProp ? parentProp + "[" + prop + "]" : prop);
+                    appendData(ownerDocument, form, data[prop], parentProp ? "".concat(parentProp, "[").concat(prop, "]") : prop);
                 });
             }
         }
         else {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
             appendInput(ownerDocument, form, parentProp, data === null || data === undefined ? '' : data.toString());
         }
     }
@@ -143,14 +143,16 @@
         appendData(form.ownerDocument, form, data, '');
     }
 
-    var __extends = (window && window.__extends) || (function () {
+    var __extends$1 = (window && window.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+                function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
             return extendStatics(d, b);
         };
         return function (d, b) {
+            if (typeof b !== "function" && b !== null)
+                throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
             extendStatics(d, b);
             function __() { this.constructor = d; }
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -160,7 +162,7 @@
      * Make a HTTP request using an iframe
      */
     var IframeHttpRequest = /** @class */ (function (_super) {
-        __extends(IframeHttpRequest, _super);
+        __extends$1(IframeHttpRequest, _super);
         /**
          * Object constructor
          *
@@ -230,7 +232,7 @@
                 case 'POST':
                     break;
                 default:
-                    throw new Error("Method not supported \"" + method + "\"");
+                    throw new Error("Method not supported \"".concat(method, "\""));
             }
         };
         IframeHttpRequest.prototype.init = function () {
@@ -239,7 +241,7 @@
             var wrapper = this.getDocument().createElement('div');
             wrapper.id = this.wrapperId;
             wrapper.style.display = 'none';
-            wrapper.innerHTML = "<form target=\"" + iframeId + "\"></form><iframe id=\"" + iframeId + "\" name=\"" + iframeId + "\" width=\"0\" height=\"0\" src=\"about:blank\"></iframe>";
+            wrapper.innerHTML = "<form target=\"".concat(iframeId, "\"></form><iframe id=\"").concat(iframeId, "\" name=\"").concat(iframeId, "\" width=\"0\" height=\"0\" src=\"about:blank\"></iframe>");
             var form = wrapper.querySelector('form');
             form.action = this.url;
             form.method = this.method;
@@ -331,25 +333,35 @@
         return IframeHttpRequest;
     }(BaseComponent));
 
-    var __extends$1 = (window && window.__extends) || (function () {
+    var __extends = (window && window.__extends) || (function () {
         var extendStatics = function (d, b) {
             extendStatics = Object.setPrototypeOf ||
                 ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-                function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+                function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
             return extendStatics(d, b);
         };
         return function (d, b) {
+            if (typeof b !== "function" && b !== null)
+                throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
             extendStatics(d, b);
             function __() { this.constructor = d; }
             d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
         };
     })();
+    /* eslint-disable @typescript-eslint/naming-convention */
+    exports.IframeMessageState = void 0;
     (function (IframeMessageState) {
         IframeMessageState[IframeMessageState["Mounted"] = 0] = "Mounted";
         IframeMessageState[IframeMessageState["BeforeUpdate"] = 1] = "BeforeUpdate";
         IframeMessageState[IframeMessageState["Updated"] = 2] = "Updated";
         IframeMessageState[IframeMessageState["Destroyed"] = 3] = "Destroyed";
     })(exports.IframeMessageState || (exports.IframeMessageState = {}));
+    /**
+     * IframeLoader event types.
+     * The type of IframeLoaderEvent
+     */
+    /* eslint-disable @typescript-eslint/naming-convention */
+    exports.IframeLoaderEventType = void 0;
     (function (IframeLoaderEventType) {
         IframeLoaderEventType["BeforeCreate"] = "beforeCreate";
         IframeLoaderEventType["Created"] = "created";
@@ -365,7 +377,7 @@
      * Load remote content inside an IFRAME.
      */
     var IframeLoader = /** @class */ (function (_super) {
-        __extends$1(IframeLoader, _super);
+        __extends(IframeLoader, _super);
         /**
          * Constructor.
          *
@@ -451,7 +463,7 @@
             }
             if (!parent)
                 // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                throw new Error("Failed to find parent \"" + opt.parent + "\".");
+                throw new Error("Failed to find parent \"".concat(opt.parent, "\"."));
             return parent;
         };
         IframeLoader.prototype.triggerEvent = function (eventType) {
@@ -470,7 +482,7 @@
                 }
                 catch (error) {
                     if (console && typeof console.error === 'function') {
-                        console.error("Calling the \"" + eventType + "\" handler failed.", error);
+                        console.error("Calling the \"".concat(eventType, "\" handler failed."), error);
                     }
                 }
             }
@@ -547,7 +559,7 @@
      * Content loaded by IframeLoader
      */
     var IframeContent = /** @class */ (function (_super) {
-        __extends$1(IframeContent, _super);
+        __extends(IframeContent, _super);
         /**
          * Constructor
          *
@@ -671,7 +683,5 @@
     exports.getUrlFullPath = getUrlFullPath;
     exports.getUrlOrigin = getUrlOrigin;
 
-    Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
+}));
 //# sourceMappingURL=index.js.map

@@ -14,12 +14,12 @@ function appendData(ownerDocument: Document, form: HTMLFormElement, data: any, p
     if (data instanceof Date) {
       appendInput(ownerDocument, form, parentProp, data.toISOString());
     } else {
-      Object.keys(data).forEach(prop => {
+      Object.keys(data as object).forEach(prop => {
         appendData(ownerDocument, form, data[prop], parentProp ? `${parentProp}[${prop}]` : prop);
       });
     }
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument
     appendInput(ownerDocument, form, parentProp, data === null || data === undefined ? '' : data.toString());
   }
 }

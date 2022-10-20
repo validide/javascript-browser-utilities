@@ -56,10 +56,10 @@ export function test_iframeLoader_content() {
 
 
 
-    it('should not post any messages when current window === window.parent',done => {
+    it('should not post any messages when current window === window.parent', done => {
       const messages = new Array<any>();
 
-      _win.addEventListener('message',e => {
+      _win.addEventListener('message', e => {
         if (e.data === 'end-the-unit-test') {
           expect(messages.length).to.be.eq(0);
           done();
@@ -121,10 +121,10 @@ export function test_iframeLoader_content() {
       ).not.throws();
     });
 
-    it('should have only 1 event as handshake did not happen',done => {
+    it('should have only 1 event as handshake did not happen', done => {
       const messages = new Array<any>();
 
-      _parent.addEventListener('message',e => {
+      _parent.addEventListener('message', e => {
         if (e.data === 'end-the-unit-test') {
           expect(messages.length).to.be.eq(1);
           expect(messages[0].id).to.be.eq('');
@@ -152,7 +152,7 @@ export function test_iframeLoader_content() {
         (content as any).windowMessageHandler({ data: data, origin: origin } as unknown);
       }
 
-      _parent.addEventListener('message',e => {
+      _parent.addEventListener('message', (e: MessageEvent<IframeMessage>) => {
         messages.push(e.data);
       });
 
@@ -160,7 +160,7 @@ export function test_iframeLoader_content() {
       _win.postMessage(undefined, 'http://localhost:91');
 
       falsies.forEach(f => {
-        postMessage(f as unknown as any, 'http://localhost:81');
+        postMessage(f as unknown as IframeMessage, 'http://localhost:81');
         postMessage({ id: '', state: IframeMessageState.Mounted, data: f as unknown as any }, 'http://localhost:81');
       });
 

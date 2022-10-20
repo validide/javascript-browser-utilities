@@ -179,7 +179,7 @@ export class IframeHttpRequest extends BaseComponent {
         this.options.timeout
         );
       } catch (error) {
-        this.reject(error);
+        this.reject(error as Error);
       }
     });
   }
@@ -212,10 +212,10 @@ export class IframeHttpRequest extends BaseComponent {
         this.schedulePromiseResolve({
           data: '',
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          error: error
+          error: error as Error
         });
       } else {
-        this.reject(error);
+        this.reject(error as Error);
       }
     }
   }

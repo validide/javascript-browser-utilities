@@ -204,7 +204,7 @@ export function test_iframeLoader_loader() {
       }
 
 
-      _win.addEventListener('message',e => {
+      _win.addEventListener('message', (e: MessageEvent<IframeMessage>) => {
         winMessages.push(e.data);
       });
 
@@ -243,7 +243,7 @@ export function test_iframeLoader_loader() {
       });
 
       // EVT BEFORE LOAD
-      postMessage(undefined as any, origin);
+      postMessage(undefined as unknown as IframeMessage, origin);
       const event = _win.document.createEvent('Event');
       event.initEvent('load', true, true);
       (_win.document.querySelector('iframe') as HTMLIFrameElement).dispatchEvent(event);
@@ -252,7 +252,7 @@ export function test_iframeLoader_loader() {
       // should not throw error
       falsies.forEach(f => {
         expect(() => {
-          postMessage(f as any, origin);
+          postMessage(f as unknown as IframeMessage, origin);
         }).not.throws();
       });
 
@@ -331,7 +331,7 @@ export function test_iframeLoader_loader() {
         idx++;
         expect(winMessages[idx].id).to.be.eq('', `ID_EVT3(${idx})`);
         expect(winMessages[idx].state).to.be.eq(IframeMessageState.Mounted, `STATE_EVT3(${idx})`);
-        expect(winMessages[idx].data).to.be.eq(getHashCode(idValue).toString(10), `DATA_EVT3(${idx})`);
+        expect(winMessages[idx].data).to.be.eq(getHashCode(idValue as unknown as string).toString(10), `DATA_EVT3(${idx})`);
 
         // Handshake Mounted
         idx++;
