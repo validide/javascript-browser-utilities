@@ -4,7 +4,9 @@
     "rootDir": "./",
     "outDir": "./.build/test-js/"
   },
-  // "include": ["./**/*.ts"],
+  // "include": [
+  //   ".eslintrc.js"
+  // ],
   "exclude": [
     ".build",
     "coverage",

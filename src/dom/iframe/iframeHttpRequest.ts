@@ -1,7 +1,7 @@
-import { generateUniqueId } from '../document/generateIds';
-import { appendDataToForm } from '../form/appendDataToForm';
-import { getUrlFullPath } from '../document/getUrlFullPath';
 import { BaseComponent } from '../../contracts/index';
+import { generateUniqueId } from '../document/generateIds';
+import { getUrlFullPath } from '../document/getUrlFullPath';
+import { appendDataToForm } from '../form/appendDataToForm';
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value: T | PromiseLike<T>) => void;
@@ -34,7 +34,7 @@ export interface IframeHttpResponse {
  */
 export class IframeHttpRequest extends BaseComponent {
   private url: string;
-  private data: any = null;
+  private data: Record<string, unknown> | null = null;
   private method = 'GET';
   private options: IframeHttpRequestOptions;
 
@@ -68,7 +68,7 @@ export class IframeHttpRequest extends BaseComponent {
   constructor(
     window: Window,
     url: string,
-    data: any | null = null,
+    data: Record<string, unknown> | null = null,
     method = 'GET',
     options: IframeHttpRequestOptions | null = null
   ) {

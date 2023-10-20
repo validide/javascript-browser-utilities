@@ -10,10 +10,10 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import 'mocha';
-import { appendDataToForm } from '../../../src/index';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
+import 'mocha';
+import { appendDataToForm } from '../../../src/index';
 
 export function test_appendformData() {
   describe('appendformData',
@@ -29,16 +29,16 @@ export function test_appendformData() {
       it('should throw an error if "ownerDocument" is null', () => {
         expect(
           () => appendDataToForm({}, ({ ownerDocument: null } as unknown) as HTMLFormElement)
-        ).throws(Error, 'The "ownerDocument" of the "form" shold be the a reference to the parent window!');
+        ).throws(Error, 'The "ownerDocument" of the "form" should be the a reference to the parent window!');
       });
 
       it('should not add any data if "undefined"', () => {
-        appendDataToForm((undefined as unknown) as Object, form);
+        appendDataToForm((undefined as unknown) as Record<string, unknown>, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
       });
 
       it('should not add any data if "null"', () => {
-        appendDataToForm((null as unknown) as Object, form);
+        appendDataToForm((null as unknown) as Record<string, unknown>, form);
         expect(form.querySelectorAll('input').length).to.eq(0);
       });
 

@@ -10,9 +10,9 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable prefer-arrow/prefer-arrow-functions */
 
-import 'mocha';
 import { expect } from 'chai';
 import { JSDOM } from 'jsdom';
+import 'mocha';
 import { IframeHttpRequest, IframeHttpRequestOptions, IframeHttpResponse } from '../../../src/dom/iframe/iframeHttpRequest';
 import { falsies } from '../../utils';
 
@@ -134,7 +134,7 @@ export function test_iframeHttpRequest() {
       it(`calling send with falsie(${falsie}) data does not throw`, () => {
         expect(
           () => {
-            const req = new IframeHttpRequest(_win, 'http://localhost/', (falsie as unknown) as object);
+            const req = new IframeHttpRequest(_win, 'http://localhost/', (falsie as unknown) as Record<string, unknown>);
             overrideFormSubmit(_win, req, () => { /* NOOP */});
 
             req.sendAsync().catch(() => { /* ignore error for this case */ });
