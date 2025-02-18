@@ -17,7 +17,7 @@
     "eslint-plugin-prefer-arrow": "1.2.3",
     "glob": "10.3.10",
     "jsdom": "22.1.0",
-    "mocha": "10.2.0",
+    "mocha": "10.8.2",
     "nyc": "15.1.0",
     "rimraf": "5.0.5",
     "rollup": "4.22.4",
