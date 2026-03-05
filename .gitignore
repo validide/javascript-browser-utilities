@@ -80,6 +80,7 @@ typings/
 
 # Nuxt.js build / generate output
 .nuxt
+.local
 dist
 
 # Gatsby files
@@ -102,3 +103,5 @@ dist
 
 # TernJS port file
 .tern-port
+.opencode/
+.claude/*.local.*

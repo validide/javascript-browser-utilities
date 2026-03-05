@@ -1,19 +1,30 @@
-name: Tests
-on: [push, pull_request]
+name: Build and test.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: "tests"
+  cancel-in-progress: false
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v6
         with:
-          node-version: 16
-      - run: npm ci
-      - run: npm test
-
-      - uses: coverallsapp/github-action@master
+          fetch-depth: 0
+      - uses: actions/setup-node@v6
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-          path-to-lcov: "./coverage/lcov.info"
+          node-version: 'lts/*'
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
 

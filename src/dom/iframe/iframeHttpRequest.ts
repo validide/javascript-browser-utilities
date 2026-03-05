@@ -1,7 +1,7 @@
-import { BaseComponent } from '../../contracts/index';
-import { generateUniqueId } from '../document/generateIds';
-import { getUrlFullPath } from '../document/getUrlFullPath';
-import { appendDataToForm } from '../form/appendDataToForm';
+import { BaseComponent } from "../../contracts/index";
+import { generateUniqueId } from "../document/generateIds";
+import { getUrlFullPath } from "../document/getUrlFullPath";
+import { appendDataToForm } from "../form/appendDataToForm";
 
 type LoadHandlerFunctionType = (this: IframeHttpRequest, e: Event) => void;
 type ResolvePromiseFunctionType<T> = (value: T | PromiseLike<T>) => void;
@@ -35,7 +35,7 @@ export interface IframeHttpResponse {
 export class IframeHttpRequest extends BaseComponent {
   private url: string;
   private data: Record<string, unknown> | null = null;
-  private method = 'GET';
+  private method = "GET";
   private options: IframeHttpRequestOptions;
 
   private resolvePromise: ResolvePromiseFunctionType<IframeHttpResponse> | null;
@@ -50,10 +50,9 @@ export class IframeHttpRequest extends BaseComponent {
   /**
    * Default options IframeHttpRequestOptions
    */
-  // eslint-disable-next-line @typescript-eslint/naming-convention
   public static DEFAULT_OPTIONS: IframeHttpRequestOptions = {
     timeout: 30 * 1000,
-    redirectTimeout: 3 * 1000
+    redirectTimeout: 3 * 1000,
   };
 
   /**
@@ -69,21 +68,20 @@ export class IframeHttpRequest extends BaseComponent {
     window: Window,
     url: string,
     data: Record<string, unknown> | null = null,
-    method = 'GET',
-    options: IframeHttpRequestOptions | null = null
+    method = "GET",
+    options: IframeHttpRequestOptions | null = null,
   ) {
     super(window);
 
     this.validateInput(url, method);
     this.url = url; // might consider defaulting to 'about:blank' as empty url is not allowed for src on iFrames and this is where this will end-up
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     this.data = data;
     this.method = method;
-    this.options = (Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options) );
+    this.options = Object.assign({}, IframeHttpRequest.DEFAULT_OPTIONS, options);
     this.resolvePromise = null;
     this.rejectPromise = null;
     this.loadHandlerRef = (e: Event) => this.loadHandler(e);
-    this.wrapperId = generateUniqueId(this.getDocument(), 'IframeHttpRequest_wrapper_');
+    this.wrapperId = generateUniqueId(this.getDocument(), "IframeHttpRequest_wrapper_");
     this.timeoutRef = 0;
     this.redirectTimeoutRef = 0;
     this.called = false;
@@ -91,8 +89,7 @@ export class IframeHttpRequest extends BaseComponent {
   }
 
   public sendAsync(): Promise<IframeHttpResponse> {
-    if (this.called)
-      throw new Error('The "send" method was already called!');
+    if (this.called) throw new Error('The "send" method was already called!');
 
     this.called = true;
     this.init();
@@ -101,8 +98,7 @@ export class IframeHttpRequest extends BaseComponent {
   }
 
   public dispose(): void {
-    if (this.disposed)
-      return;
+    if (this.disposed) return;
 
     this.disposed = true;
     const win = this.getWindow();
@@ -113,26 +109,29 @@ export class IframeHttpRequest extends BaseComponent {
     const wrapper = this.getDocument().getElementById(this.wrapperId);
 
     if (wrapper) {
-      (wrapper.querySelector('iframe') as HTMLIFrameElement).removeEventListener('load', this.loadHandlerRef as LoadHandlerFunctionType, false);
+      (wrapper.querySelector("iframe") as HTMLIFrameElement).removeEventListener(
+        "load",
+        this.loadHandlerRef as LoadHandlerFunctionType,
+        false,
+      );
       (wrapper.parentElement as HTMLElement).removeChild(wrapper);
     }
 
     this.loadHandlerRef = null;
     this.resolvePromise = null;
     this.rejectPromise = null;
-    this.url = '';
-    this.method = '';
-    this.wrapperId = '';
+    this.url = "";
+    this.method = "";
+    this.wrapperId = "";
     super.dispose();
   }
 
   private validateInput(url: string, method: string): void {
-    if (!url)
-      throw new Error('Missing "url" reference.');
+    if (!url) throw new Error('Missing "url" reference.');
 
     switch (method.toUpperCase()) {
-      case 'GET':
-      case 'POST':
+      case "GET":
+      case "POST":
         break;
 
       default:
@@ -141,15 +140,15 @@ export class IframeHttpRequest extends BaseComponent {
   }
 
   private init(): void {
-    const iframeId = this.wrapperId + '_iframe';
+    const iframeId = `${this.wrapperId}_iframe`;
     const fragment = this.getDocument().createDocumentFragment();
-    const wrapper = this.getDocument().createElement('div');
+    const wrapper = this.getDocument().createElement("div");
 
     wrapper.id = this.wrapperId;
-    wrapper.style.display = 'none';
+    wrapper.style.display = "none";
     wrapper.innerHTML = `<form target="${iframeId}"></form><iframe id="${iframeId}" name="${iframeId}" width="0" height="0" src="about:blank"></iframe>`;
 
-    const form = wrapper.querySelector('form') as HTMLFormElement;
+    const form = wrapper.querySelector("form") as HTMLFormElement;
     form.action = this.url;
     form.method = this.method;
     form.target = iframeId;
@@ -160,9 +159,9 @@ export class IframeHttpRequest extends BaseComponent {
     fragment.appendChild(wrapper);
     this.getDocument().body.appendChild(fragment);
 
-    const iframe = wrapper.querySelector('iframe') as HTMLIFrameElement;
+    const iframe = wrapper.querySelector("iframe") as HTMLIFrameElement;
 
-    iframe.addEventListener('load', this.loadHandlerRef as LoadHandlerFunctionType, false);
+    iframe.addEventListener("load", this.loadHandlerRef as LoadHandlerFunctionType, false);
   }
 
   private sendAsyncCore(): Promise<IframeHttpResponse> {
@@ -172,12 +171,10 @@ export class IframeHttpRequest extends BaseComponent {
 
       const wrapper = this.getDocument().getElementById(this.wrapperId) as HTMLDivElement;
       try {
-        (wrapper.querySelector('form') as HTMLFormElement).submit();
+        (wrapper.querySelector("form") as HTMLFormElement).submit();
         this.timeoutRef = this.getWindow().setTimeout(() => {
-          this.reject(new Error('TIMEOUT'));
-        },
-        this.options.timeout
-        );
+          this.reject(new Error("TIMEOUT"));
+        }, this.options.timeout);
       } catch (error) {
         this.reject(error as Error);
       }
@@ -193,12 +190,12 @@ export class IframeHttpRequest extends BaseComponent {
       // this should throw if iframe is not accessible due to 'X-Frame-Options'
       const targetPath = getUrlFullPath(contentWindow.document, contentWindow.location.href).toLowerCase();
       const desiredPath = getUrlFullPath(contentWindow.document, this.url).toLowerCase();
-      const result:IframeHttpResponse = {
+      const result: IframeHttpResponse = {
         data: contentWindow.document.body.textContent as string,
-        error: null
+        error: null,
       };
 
-      if ((targetPath === desiredPath)) {
+      if (targetPath === desiredPath) {
         this.resolve(result);
       } else {
         if (allowRedirects) {
@@ -210,9 +207,8 @@ export class IframeHttpRequest extends BaseComponent {
     } catch (error) {
       if (allowRedirects) {
         this.schedulePromiseResolve({
-          data: '',
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          error: error as Error
+          data: "",
+          error: error as Error,
         });
       } else {
         this.reject(error as Error);
@@ -220,10 +216,12 @@ export class IframeHttpRequest extends BaseComponent {
     }
   }
 
-  private schedulePromiseResolve(result:IframeHttpResponse): void {
+  private schedulePromiseResolve(result: IframeHttpResponse): void {
     const win = this.getWindow();
     win.clearTimeout(this.redirectTimeoutRef);
-    this.redirectTimeoutRef = win.setTimeout(() => { this.resolve(result); }, this.options.redirectTimeout);
+    this.redirectTimeoutRef = win.setTimeout(() => {
+      this.resolve(result);
+    }, this.options.redirectTimeout);
   }
 
   private resolve(value: IframeHttpResponse): void {
@@ -232,7 +230,7 @@ export class IframeHttpRequest extends BaseComponent {
   }
 
   private reject(error: Error): void {
-    (this.rejectPromise as RejectPromiseFunctionType)({ data: '', error: error });
+    (this.rejectPromise as RejectPromiseFunctionType)({ data: "", error: error });
     this.dispose();
   }
 }
