@@ -8,11 +8,16 @@ This site provides usage information, API docs and demo pages for the library.
 
 - API reference: /api/
 - Demo pages: /demo/
- - Demo pages: /demo/
 
-Demo files have been moved to `docs/demo/`. Open `docs/demo/index.html` to see available demo pages.
+Demo files are in docs/demo/. The default local dev command now opens the demo page directly.
 
 ## Local development
+
+Run the demo site locally with:
+
+```
+npm run dev
+```
 
 Run the docs site locally with:
 

@@ -27,7 +27,8 @@
   },
   "scripts": {
     "clean": "node ./ci-cd/clean.js",
-    "dev": "vite",
+    "dev": "vite --config vite.demo.config.ts",
+    "dev:root": "vite --open /",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prelint": "node ./ci-cd/clean.js",
@@ -35,7 +36,8 @@
     "test": "vitest run --coverage",
     "docs:dev": "typedoc && vitepress dev docs",
     "docs:build": "typedoc && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
+    "docs:preview": "vitepress preview docs",
+    "demo:dev": "vite --config vite.demo.config.ts"
   },
   "repository": {
     "type": "git",

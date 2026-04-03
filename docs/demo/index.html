@@ -6,22 +6,26 @@
   <title>JavaScript Browser Utilities</title>
   <meta name="description" content="JavaScript Browser Utilities Library">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css"
-    integrity="sha256-iAmWN8uaUdN6Y9FCf8srQdrx3eVVwouJ5QtEiyuTQ6A=" crossorigin="anonymous" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="./css/app.css" />
   <link rel="icon" href="./favicon.ico" type="image/x-icon" />
 </head>
 
 <body>
-  <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom shadow-sm">
-    <h5 class="my-0 mr-md-auto font-weight-normal">JavaScript Browser Utilities</h5>
+  <div class="demo-header d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    <h5 class="my-0 me-md-auto fw-normal">JavaScript Browser Utilities</h5>
   </div>
 
-  <div class="container">
-    <h1>JavaScript Browser Utilities</h1>
-    <section>
+  <div class="container demo-content">
+    <h1 class="display-5 fw-bold">JavaScript Browser Utilities</h1>
+    <p class="demo-subtitle">Interactive playground for iframe request and loader behavior, including redirect and modal scenarios used during development.</p>
+    <section class="demo-section demo-status">
       <hr />
       <h2>Status</h2>
       <a href="https://coveralls.io/github/validide/javascript-browser-utilities?branch=master" rel="nofollow"><img
@@ -41,12 +45,12 @@
           src="https://img.shields.io/github/license/validide/javascript-browser-utilities"></a>
     </section>
 
-    <section>
+    <section class="demo-section">
       <hr />
       <h2>IFRAME MODULE</h2>
       <section>
         <h3>IframeHttpRequest</h3>
-        <article>
+        <article class="demo-card">
           <h3>Simple</h3>
           <p>Send a HTTP request using an IFRAME.</p>
           <div class="container">
@@ -62,7 +66,7 @@
             </div>
           </div>
         </article>
-        <article>
+        <article class="demo-card">
           <h3>Redirect without configuration</h3>
           <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since
             `redirectTimeout` is 1s and the redirect delay is 1.5s we will wrongfully display the redirect page content.
@@ -80,7 +84,7 @@
             </div>
           </div>
         </article>
-        <article>
+        <article class="demo-card">
           <h3>Redirect with configuration</h3>
           <p>Send a HTTP request using an IFRAME but without having the corect redirect configuration. Since
             `redirectTimeout` is 2s and the redirect delay is 1.5s we will display the correct content.</p>
@@ -100,7 +104,7 @@
       </section>
       <section>
         <h3>IframeLoader</h3>
-        <article>
+        <article class="demo-card">
           <h3>Simple</h3>
           <p>Load content inside of an iframe.</p>
           <div class="container">
@@ -128,12 +132,12 @@
             </div>
           </div>
         </article>
-        <article>
+        <article class="demo-card">
           <h3>Modal Content IframeLoader</h3>
           <div class="container">
             <div class="row">
               <div class="col-12">
-                <a role="button" href="javascript:void(0)" class="btn btn-primary" id="open-modal">Open Modal</a>
+                <button type="button" class="btn btn-primary" id="open-modal" aria-haspopup="dialog" aria-label="Open iframe modal demo">Open Modal</button>
                 <div data-code="js-IframeLoader-modal"></div>
               </div>
             </div>
@@ -143,26 +147,12 @@
     </section>
   </div>
 
-
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
-    integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
-    crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-    integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-    crossorigin="anonymous"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
-    integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
-    crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"
-    integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/http.min.js"
-    integrity="sha256-JEmpYI2Z16TgFAij82HWStfsanuGknz7sCDYdOjbj60=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/javascript.min.js"
-    integrity="sha256-7m7j1FpXjzQA3XImtaWCPdm6JrXZFd1rjRiKes8kJO8=" crossorigin="anonymous"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/languages/json.min.js"
-    integrity="sha256-e+lKyc6IHmfX3PMu1Z1Xi1KAHZRUYwKP/KD/n5C7ecs=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="./lib/bundle/index.js"></script>
   <script src="./js/app.js"></script>
+  <script src="./js/demo-loader-scenarios.js"></script>
   <script>
     (function () {
       //window.addEventListener('message', function (e) { console.log(e); });
@@ -170,289 +160,64 @@
   </script>
   <script data-lang="js" id="js-IframeHttpRequest">
     (function () {
-      var request = new validide_jbu.IframeHttpRequest(
-        window,
-        './data/random.json',
-        null,
-        'GET',
-        {
+      window.app.runIframeHttpRequestDemo({
+        resultElementId: 'result-IframeHttpRequest',
+        url: './data/random.json',
+        requestOptions: {
           timeout: 30_000,
           redirectTimeout: 1_000
-        }
-      );
-      var container = window.document
-        .getElementById('result-IframeHttpRequest');
-      request.sendAsync().then(
-        function (res) {
-          window.app.removeLoader(container);
-          if (res.data) {
-            window.app.appendAsCode(container, res.data, 'json');
-          } else {
-            window.app.appendAsCode(container, res.error.message);
-          }
         },
-        function (err) {
-          window.app.removeLoader(container);
-          window.app.appendAsCode(container, err.error.message);
-        }
-      );
-      window.app.addLoader(container);
+        successLanguage: 'json'
+      });
     })();
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-wrong">
     (function () {
-      var request = new validide_jbu.IframeHttpRequest(
-        window,
-        './redirect.html',
-        {
+      window.app.runIframeHttpRequestDemo({
+        resultElementId: 'result-wrong-IframeHttpRequest',
+        url: './redirect.html',
+        data: {
           iterate: 5,
           url: validide_jbu.getUrlFullPath(window.document, './data/random.json')
         },
-        'GET',
-        {
+        requestOptions: {
           timeout: 30_000,
           redirectTimeout: 1_000
-        }
-      );
-      var container = window.document
-        .getElementById('result-wrong-IframeHttpRequest');
-      var prom = request.sendAsync();
-      // fake the url to allow the redirect - for testing only
-      request.url = 'http://foo.bar/';
-      prom.then(
-        function (res) {
-          window.app.removeLoader(container);
-          if (res.data) {
-            window.app.appendAsCode(container, res.data, 'html');
-          } else {
-            window.app.appendAsCode(container, res.error.message);
-          }
         },
-        function (err) {
-          window.app.removeLoader(container);
-          window.app.appendAsCode(container, err.error.message);
+        successLanguage: 'html',
+        // Fake the URL to allow the redirect. This is for demonstration/testing only.
+        afterSend: function (request) {
+          request.url = 'http://foo.bar/';
         }
-      );
-      window.app.addLoader(container);
+      });
     })();
   </script>
   <script data-lang="js" id="js-IframeHttpRequest-redirect-correct">
     (function () {
-      var request = new validide_jbu.IframeHttpRequest(
-        window,
-        './redirect.html',
-        {
+      window.app.runIframeHttpRequestDemo({
+        resultElementId: 'result-correct-IframeHttpRequest',
+        url: './redirect.html',
+        data: {
           iterate: 2,
           url: validide_jbu.getUrlFullPath(window.document, './data/random.json')
         },
-        'GET',
-        {
+        requestOptions: {
           timeout: 30_000,
           redirectTimeout: 2_000
-        }
-      );
-      var container = window.document
-        .getElementById('result-correct-IframeHttpRequest');
-      var prom = request.sendAsync();
-      // fake the url to allow the redirect - for testing only
-      request.url = 'http://foo.bar/';
-      prom.then(
-        function (res) {
-          window.app.removeLoader(container);
-          if (res.data) {
-            window.app.appendAsCode(container, res.data, 'json');
-          } else {
-            window.app.appendAsCode(container, res.error.message);
-          }
         },
-        function (err) {
-          window.app.removeLoader(container);
-          window.app.appendAsCode(container, err.error.message);
+        successLanguage: 'json',
+        // Fake the URL to allow the redirect. This is for demonstration/testing only.
+        afterSend: function (request) {
+          request.url = 'http://foo.bar/';
         }
-      );
-      window.app.addLoader(container);
+      });
     })();
   </script>
-  <script data-lang="js" id="js-IframeLoader-simple">
-    (function () {
-      var consoleContainer = window.document.getElementById('console-IframeLoader-simple');
-      var events = [];
-      var eventHander = function (e, contentContainer) {
-        events.push(e);
-
-        switch (e.type) {
-          case 'beforeCreate': {
-            window.app.addLoader(contentContainer);
-            break;
-          }
-          case 'created': {
-            e.el.classList.add('iframe-block-content');
-            e.el.classList.add('iframe-pending-ready');
-            break;
-          }
-          case 'beforeMount': {
-            break;
-          }
-          case 'mounted': {
-            break;
-          }
-          case 'beforeUpdate': {
-            window.app.addLoader(contentContainer);
-            break;
-          }
-          case 'updated': {
-            e.el.classList.remove('iframe-pending-ready');
-            window.app.removeLoader(contentContainer);
-            break;
-          }
-          case 'beforeDestroy': {
-            alert('Component "' + e.el.querySelector('iframe').src + '" is about to destroy!');
-            break;
-          }
-          case 'destroyed': {
-            window.app.removeLoader(contentContainer);
-            alert('Component wad destroyed!');
-            break;
-          }
-
-          default:
-            break;
-        }
-
-        consoleContainer.innerHTML = '';
-        window.app.appendAsCode(
-          consoleContainer,
-          events.map(e => JSON.stringify(e, undefined, 2)).join('\n'));
-      };
-
-      function createIframeLoader(url, parent) {
-        var parentEl = document.getElementById(parent);
-        return new validide_jbu.IframeLoader(window, {
-          url: url,
-          parent: parentEl,
-          events: {
-            beforeCreate: function (e) {
-              eventHander(e, parentEl);
-            },
-            created: function (e) {
-              eventHander(e, parentEl);
-            },
-            beforeMount: function (e) {
-              eventHander(e, parentEl);
-            },
-            mounted: function (e) {
-              eventHander(e, parentEl);
-            },
-            beforeUpdate: function (e) {
-              eventHander(e, parentEl);
-            },
-            updated: function (e) {
-              eventHander(e, parentEl);
-            },
-            beforeDestroy: function (e) {
-              eventHander(e, parentEl);
-            },
-            destroyed: function (e) {
-              eventHander(e, parentEl);
-            }
-          },
-          iframeAttributes: {
-            'allowtransparency': 'true',
-            'frameborder': 0
-          }
-        });
-      };
-
-      var iframeContentLoader = createIframeLoader(
-        './redirect.html?iterate=3&url=' + encodeURIComponent(validide_jbu.getUrlFullPath(window.document, './simple-iframe-content.html')),
-        'result-IframeLoader-simple'
-      );
-
-      var crossDomainIframeContentLoader = createIframeLoader(
-        'https://vadi-testing-stuff.firebaseapp.com/javascript-browser-utilities/simple-iframe-content.html',
-        'result-IframeLoader-cross-domain'
-      );
-    })();
+  <script data-lang="js" id="js-IframeLoader-simple" type="text/plain">
+    window.app.runIframeLoaderSimpleDemo();
   </script>
-  <script data-lang="js" id="js-IframeLoader-modal">
-    (function () {
-      var contentLoader = null;
-      var btn = document.getElementById('open-modal');
-      btn.addEventListener('click', openModal);
-
-      function openModal(e) {
-        e.target.setAttribute('disabled', 'disabled');
-        if (contentLoader)
-          return; // Should not happen but better be safe.
-
-        contentLoader = new validide_jbu
-          .IframeLoader(window, {
-            url: './redirect.html?iterate=5&url='
-              + encodeURIComponent(validide_jbu.getUrlFullPath(
-                window.document,
-                './modal-iframe-content.html'
-              )),
-            parent: 'body',
-            events: {
-              beforeCreate: eventHander,
-              created: eventHander,
-              beforeMount: eventHander,
-              mounted: eventHander,
-              beforeUpdate: eventHander,
-              updated: eventHander,
-              beforeDestroy: eventHander,
-              destroyed: eventHander
-            },
-            iframeAttributes: {
-              'allowtransparency': 'true',
-              'frameborder': 0
-            }
-          });
-      }
-
-      var eventHander = function (e) {
-        console.log(e);
-        switch (e.type) {
-          case 'beforeCreate': {
-            window.app.setPageLoadingState(true);
-            break;
-          }
-          case 'created': {
-            e.el.classList.add('d-none');
-            break;
-          }
-          case 'beforeMount': {
-            break;
-          }
-          case 'mounted': {
-            break;
-          }
-          case 'beforeUpdate': {
-            window.app.setPageLoadingState(true);
-            break;
-          }
-          case 'updated': {
-            e.el.classList.remove('d-none');
-            e.el.classList.add('iframe-modal-content');
-            window.app.setPageLoadingState(false);
-            break;
-          }
-          case 'beforeDestroy': {
-            window.app.setPageLoadingState(true);
-            break;
-          }
-          case 'destroyed': {
-            window.app.setPageLoadingState(false);
-            contentLoader = null;
-            btn.removeAttribute('disabled');
-            break;
-          }
-
-          default:
-            break;
-        }
-      };
-    })();
+  <script data-lang="js" id="js-IframeLoader-modal" type="text/plain">
+    window.app.runIframeLoaderModalDemo();
   </script>
 </body>
 

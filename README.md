@@ -11,3 +11,19 @@ JavaScript Browser Utilities
 ## Demo
 
 [Demo site](https://validide.github.io/javascript-browser-utilities/)
+
+## Local development
+
+Run the demo site (default dev surface):
+
+```bash
+npm run dev
+```
+
+The demo dev server uses [vite.demo.config.ts](vite.demo.config.ts) with docs/demo/ as the root.
+
+Run the docs site:
+
+```bash
+npm run docs:dev
+```
