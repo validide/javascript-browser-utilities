@@ -21,7 +21,7 @@
     "jsdom-global": "3.0.2",
     "typedoc": "0.28.20",
     "typescript": "7.0.2",
-    "vite": "8.2.2",
+    "vite": "8.2.4",
     "vitepress": "1.6.4",
     "vitest": "5.0.3"
   },
